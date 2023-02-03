@@ -6,7 +6,7 @@ Blue='\033[0;34m'
 mkdir -p ./DBMS
 echo "Weclome to our DBMS"
 echo "Made by Mustafa and Adham"
-echo "Under the supervision of DR.Sherine <3"
+echo -e "Under the supervision of DR.Sherine ${RED}<3${Color_Off}"
 
 function mainMenu {
 	echo "Enter Your choice : "
