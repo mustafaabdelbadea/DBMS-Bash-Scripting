@@ -75,7 +75,31 @@ mainMenu
 }
 
 function connectDatabase {
-	echo hi
+	echo "Enter database name to connect"
+	read databaseName
+
+	cd DBMS/$databaseName 2>>./.error.log
+#-z option check for length of string = zero
+	if [[ -z $databaseName ]]
+		then
+		echo "Enter Name"
+		connectDatabase
+		elif [[ $databaseName =~ ^[a-zA-Z]+$ ]]
+		then 
+			#check if there is a directory -d
+			if [[ -d DBMS/$databaseName ]]
+			then
+				echo "Connected"
+				cd DBMS/$databaseName
+			else
+				echo "Database doesn't exists, Please Create DB first"
+				createDatabase
+			fi
+	fi
+			
+
+
+
 
 mainMenu
 }
