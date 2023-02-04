@@ -73,6 +73,16 @@ function createTable {
 		echo "Table already exists"
 		tableMenu 
 	fi
+
+	echo "Enter number of columns"
+	read colNumbers
+
+	counter=1
+
+	while [ $counter -lt $colNumbers ]
+	do
+	done
+	
 }
 
 function insert {
