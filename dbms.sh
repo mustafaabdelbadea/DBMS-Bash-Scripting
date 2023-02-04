@@ -7,7 +7,6 @@ echo -e "Under the supervision of DR.Sherine ${RED}<3${Color_Off}"
 
 
 function mainMenu {
-	pwd
 	echo "Enter Your choice : "
 	echo "1. Create Database : "
 	echo "2. List Databases : "
@@ -29,11 +28,27 @@ function backToMain {
 	cd ../.. 2>>../../.error.log
 	if [[ $? == 0 ]]
 	then 
+		clear
 		echo -e "${Yellow}Disconnected !${Color_Off}"
 		mainMenu
 	else 
 		echo -e "${RED}Error while Disconnecting !${Color_Off} "
 	fi
+}
+
+function listTables {
+	# -1 option used to display file per line | wc check for lines 
+	if [[ `ls -1 | wc -l` -eq 0 ]]
+		then 
+			echo -e "${RED}DB is Empty no Tables Found${Color_Off}"
+		else
+			clear
+			echo -e "${Blue}--------- Tables ----------"
+			ls -1 2>>../../.error.log
+			echo -e "----------------------------------------------------------${Color_Off}"
+		fi
+
+	tableMenu
 }
 
 function tableMenu {
@@ -52,7 +67,7 @@ function tableMenu {
 
 	case $choice in 
 	1) echo "create table";;
-	2) echo "List Tables";;
+	2) listTables;;
 	3) echo "Drop Table";;
 	4) echo "Insert into table";;
 	5) echo "select table";;
@@ -83,13 +98,14 @@ function createDatabase {
 }
 
 function listDatabases {
-
+	clear
 	databaseCount=$(ls ./DBMS | wc -l)
 	if [[ $databaseCount -eq 0 ]]; then
 		echo -e "${RED} No databases yet ${Color_Off}"
 	else
-		echo -e "${Blue} --------Databases---------- ${Color_Off}"
-		ls ./DBMS
+		echo -e "${Blue}--------Databases----------"
+		ls -1 ./DBMS
+		echo -e "${Color_Off}"
 	fi
 
 	mainMenu
