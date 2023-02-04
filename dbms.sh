@@ -66,6 +66,26 @@ function dropTable {
 	tableMenu
 }
 
+function createTable {
+	echo "Hello from Create table"
+}
+
+function insert {
+	echo "Hello from insert"
+}
+
+function selectTable {
+	echo "select"
+}
+
+function deleteFromTable {
+	echo "delete"
+}
+
+function updateTable {
+	echo "update"
+}
+
 function tableMenu {
 	echo "---------- Table Menu -----------"
 	echo "1. Create Table"
@@ -81,17 +101,17 @@ function tableMenu {
 	read choice
 
 	case $choice in
-	1) echo "create table" ;;
+	1) createTable;;
 	2) listTables ;;
 	3) dropTable ;;
-	4) echo "Insert into table" ;;
-	5) echo "select table" ;;
-	6) echo "delete" ;;
-	7) echo "Update Table" ;;
+	4) insert ;;
+	5) selectTable;;
+	6) deleteFromTable;;
+	7) updateTable;;
 	8) backToMain ;;
 	9) exit ;;
 	*)
-		echo -e "${RED}Invalid choice${Color_Off}"
+		echo -e "${RED}Invalid choice${Color_Off}";
 		tableMenu
 		;;
 	esac
