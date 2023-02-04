@@ -1,14 +1,13 @@
 #!/bin/bash
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-Color_Off='\033[0m'
-Blue='\033[0;34m' 
+source ./colors.sh
 mkdir -p ./DBMS
 echo "Weclome to our DBMS"
 echo "Made by Mustafa and Adham"
 echo -e "Under the supervision of DR.Sherine ${RED}<3${Color_Off}"
 
+
 function mainMenu {
+	pwd
 	echo "Enter Your choice : "
 	echo "1. Create Database : "
 	echo "2. List Databases : "
@@ -23,6 +22,45 @@ function mainMenu {
 	4) dropDatabase ;;
 	5) exit ;;
 	*) mainMenu ;;
+	esac
+}
+
+function backToMain {
+	cd ../.. 2>>../../.error.log
+	if [[ $? == 0 ]]
+	then 
+		echo -e "${Yellow}Disconnected !${Color_Off}"
+		mainMenu
+	else 
+		echo -e "${RED}Error while Disconnecting !${Color_Off} "
+	fi
+}
+
+function tableMenu {
+	echo "---------- Table Menu -----------"
+	echo "1. Create Table"
+	echo "2. List Tables"
+	echo "3. Drop Table"
+	echo "4. Insert into Table"
+	echo "5. Select from Table"
+	echo "6. Delete from Table"
+	echo "7. Update Table"
+	echo "8. Back to main menu"
+	echo "9. Exit"
+
+	read choice
+
+	case $choice in 
+	1) echo "create table";;
+	2) echo "List Tables";;
+	3) echo "Drop Table";;
+	4) echo "Insert into table";;
+	5) echo "select table";;
+	6) echo "delete";;
+	7) echo "Update Table";;
+	8) backToMain;;
+	9) exit;;
+	*) echo -e "${RED}Invalid choice${Color_Off}"; tableMenu;;
 	esac
 }
 
@@ -80,31 +118,13 @@ function connectDatabase {
 
 	if [[ $? == 0 ]]; then
 		echo -e "${GREEN} Connected to $databaseName Successfully ${Color_Off}"
+		tableMenu
 	else
 		echo -e "${RED} Error Connecting database, DB doesn't exist ${Color_Off}"
-		createDatabase
+		mainMenu
 	fi
-
-	#-z option check for length of string = zero
-	# if [[ -z $databaseName ]]
-	# 	then
-	# 	echo "Enter Name"
-	# 	connectDatabase
-	# 	elif [[ $databaseName =~ ^[a-zA-Z]+$ ]]
-	# 	then
-	# 		pwd
-	# 		#check if there is a directory -d
-	# 		if [[ -d DBMS/$databaseName ]]
-	# 		then
-	# 			echo "Connected"
-	# 			cd DBMS/$databaseName
-	# 		else
-	# 			echo "Database doesn't exists, Please Create DB first"
-	# 			createDatabase
-	# 		fi
-	# fi
-
-	mainMenu
 }
+
+
 
 mainMenu
