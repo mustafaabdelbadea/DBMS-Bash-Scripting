@@ -5,14 +5,13 @@ echo "Weclome to our DBMS"
 echo "Made by Mustafa and Adham"
 echo -e "Under the supervision of DR.Sherine ${RED}<3${Color_Off}"
 
-
 function mainMenu {
-	echo "Enter Your choice : "
-	echo "1. Create Database : "
-	echo "2. List Databases : "
-	echo "3. Connect to  Database : "
-	echo "4. Drop Database : "
-	echo "5. Exit "
+	echo "Enter Your choice"
+	echo "1. Create Database"
+	echo "2. List Databases"
+	echo "3. Connect to  Database"
+	echo "4. Drop Database"
+	echo "5. Exit"
 	read choice
 	case $choice in
 	1) createDatabase ;;
@@ -26,28 +25,44 @@ function mainMenu {
 
 function backToMain {
 	cd ../.. 2>>../../.error.log
-	if [[ $? == 0 ]]
-	then 
+	if [[ $? == 0 ]]; then
 		clear
 		echo -e "${Yellow}Disconnected !${Color_Off}"
 		mainMenu
-	else 
+	else
 		echo -e "${RED}Error while Disconnecting !${Color_Off} "
 	fi
 }
 
 function listTables {
-	# -1 option used to display file per line | wc check for lines 
-	if [[ `ls -1 | wc -l` -eq 0 ]]
-		then 
-			echo -e "${RED}DB is Empty no Tables Found${Color_Off}"
-		else
-			clear
-			echo -e "${Blue}--------- Tables ----------"
-			ls -1 2>>../../.error.log
-			echo -e "----------------------------------------------------------${Color_Off}"
-		fi
+	# -1 option used to display file per line | wc check for lines
+	if [[ $(ls -1 | wc -l) -eq 0 ]]; then
+		echo -e "${RED}DB is Empty no Tables Found${Color_Off}"
+	else
+		clear
+		echo -e "${Blue}--------- Tables ----------"
+		ls -1 2>>../../.error.log
+		echo -e "----------------------------------------------------------${Color_Off}"
+	fi
 
+	tableMenu
+}
+
+function dropTable {
+	clear
+	echo "Enter name of table or 0 to back to tables menu"
+	read choice
+	if [[ $choice == 0 ]]; then
+		echo "Back"
+		tableMenu
+	else
+		rm $choice 2>>../../.error.log
+		if [[ $? == 0 ]]; then
+			echo -e "${GREEN}DB $choice Deleted Successfully${Color_Off}"
+		else
+			echo -e "${RED}Error while deleting table, Invalid DB name${Color_Off}"
+		fi
+	fi
 	tableMenu
 }
 
@@ -65,17 +80,20 @@ function tableMenu {
 
 	read choice
 
-	case $choice in 
-	1) echo "create table";;
-	2) listTables;;
-	3) echo "Drop Table";;
-	4) echo "Insert into table";;
-	5) echo "select table";;
-	6) echo "delete";;
-	7) echo "Update Table";;
-	8) backToMain;;
-	9) exit;;
-	*) echo -e "${RED}Invalid choice${Color_Off}"; tableMenu;;
+	case $choice in
+	1) echo "create table" ;;
+	2) listTables ;;
+	3) dropTable ;;
+	4) echo "Insert into table" ;;
+	5) echo "select table" ;;
+	6) echo "delete" ;;
+	7) echo "Update Table" ;;
+	8) backToMain ;;
+	9) exit ;;
+	*)
+		echo -e "${RED}Invalid choice${Color_Off}"
+		tableMenu
+		;;
 	esac
 }
 
@@ -140,7 +158,5 @@ function connectDatabase {
 		mainMenu
 	fi
 }
-
-
 
 mainMenu
