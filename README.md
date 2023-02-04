@@ -14,7 +14,7 @@ cd DBMS-ShellScript
 ```
 
 ## Running
-*Run the application
+* Run the application
 
     ```
     chmod u+x ./dbms.sh
