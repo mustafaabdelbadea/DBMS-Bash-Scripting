@@ -56,6 +56,7 @@ function dropTable {
 		echo "Back"
 		tableMenu
 	else
+		rm ./.$choice 2>> ../../.error.log
 		rm $choice 2>>../../.error.log
 		if [[ $? == 0 ]]; then
 			echo -e "${GREEN}DB $choice Deleted Successfully${Color_Off}"
@@ -75,14 +76,14 @@ function createTable {
 	fi
 
 	echo "Enter number of columns"
-	read colNumbers
+	read colNumber
 
 	counter=1
 	primaryKey=""
-	rowSeparator ="\n"
-	separator ="#"
-	metaData ="field"$separator"type"$separator"pKey"
-	while [ $counter -lt $colNumbers ]
+	rowSeparator="'\n'"
+	separator="#"
+	metaData="field"$separator"type"$separator"pKey"
+	while [ $counter -le $colNumber ]
 	do
 		echo "Enter name of column no. $counter"
 		read columnName
@@ -90,11 +91,14 @@ function createTable {
 		select type in "str" "int"
 			do
 			case $type in
-			str) columnType = "str"
-					break;;
-			int) columnType = "int"
-					break;;
-			*) echo "wrong choice";;
+			str ) columnType="str"
+					break
+					;;
+			int ) columnType="int"
+					break
+					;;
+			*) echo "wrong choice"
+			;;
 			esac
 		done
 
@@ -103,21 +107,40 @@ function createTable {
 			echo "Would you like this column to be the primary key ?(yes/no)"
 			select ans in "yes" "no"
 			do
-			case $type in
-			yes) pKey="PK"
-				metaData+=$rowSeparator$column$separator$columnType$separator$pKey
+			case $ans in
+			yes ) primaryKey="PK"
+				metaData+=$"\n"$columnName$separator$columnType$separator$primaryKey
 				break;;
-			no) metaData+=$rowSeparator$columnName$separator$columnType$separator$pKey
+			no ) metaData+=$"\n"$columnName$separator$columnType$separator$primaryKey
 					break;;
 			*) echo "wrong choice";;
 			esac
 		done
 		else
-			metaData+=$rowSeparator$columnName$separator$columnType$separator$pKey
+			metaData+=$"\n"$columnName$separator$columnType$separator
 		fi
 
+		if [[ $counter == $colNumber ]]
+		then
+			temp=$temp$columnName
+		else
+			temp=$temp$columnName$separator
+		fi
+
+		((counter++))
 	done
-	
+	touch .$tableName
+	echo -e $metaData >> .$tableName
+	touch $tableName
+	echo -e $temp >> $tableName
+	if [[ $? == 0 ]]
+	then
+		echo "Table Created"
+		tableMenu
+	else
+		echo "error creating table $tableName"
+		tableMenu
+	fi
 }
 
 function insert {
