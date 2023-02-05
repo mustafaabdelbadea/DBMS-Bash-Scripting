@@ -156,7 +156,7 @@ function dropDatabase {
 
 	rm -r ./DBMS/$databaseName 2>>./.error.log
 	if [[ $? == 0 ]]; then
-		echo -e "{GREEN} $databaseName Dropped Successfully {Color_Off}"
+		echo -e "${GREEN} $databaseName Dropped Successfully ${Color_Off}"
 	else
 		echo -e "${RED} Error while dropping database {Color_Off}"
 		echo "${RED} Wrong name or database doesn't exist {Color_Off}"
