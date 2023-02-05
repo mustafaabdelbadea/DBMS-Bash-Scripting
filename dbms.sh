@@ -56,7 +56,7 @@ function dropTable {
 		echo "Back"
 		tableMenu
 	else
-		rm ./.$choice 2>> ../../.error.log
+		rm ./.$choice 2>>../../.error.log
 		rm $choice 2>>../../.error.log
 		if [[ $? == 0 ]]; then
 			echo -e "${GREEN}DB $choice Deleted Successfully${Color_Off}"
@@ -72,7 +72,7 @@ function createTable {
 	read tableName
 	if [[ -f $tableName ]]; then
 		echo "Table already exists"
-		tableMenu 
+		tableMenu
 	fi
 
 	echo "Enter number of columns"
@@ -80,48 +80,50 @@ function createTable {
 
 	counter=1
 	primaryKey=""
-	#rowSeparator="'\n'"
+	rowSeparator="'\n'"
 	separator="#"
 	metaData="field"$separator"type"$separator"pKey"
-	while [ $counter -le $colNumber ]
-	do
+	while [ $counter -le $colNumber ]; do
 		echo "Enter name of column no. $counter"
 		read columnName
 		echo "Enter type of column $columnName  (str/int)"
-		select type in "str" "int"
-			do
+		select type in "str" "int"; do
 			case $type in
-			str ) columnType="str"
-					break
-					;;
-			int ) columnType="int"
-					break
-					;;
-			*) echo "wrong choice"
-			;;
+			str)
+				columnType="str"
+				break
+				;;
+			int)
+				columnType="int"
+				break
+				;;
+			*)
+				echo "wrong choice"
+				;;
 			esac
 		done
 
-		if [[ $primaryKey == "" ]]
-		then
+		if [[ $primaryKey == "" ]]; then
 			echo "Would you like this column to be the primary key ?(yes/no)"
-			select ans in "yes" "no"
-			do
-			case $ans in
-			yes ) primaryKey="PK"
-				metaData+=$"\n"$columnName$separator$columnType$separator$primaryKey
-				break;;
-			no ) metaData+=$"\n"$columnName$separator$columnType$separator$primaryKey
-					break;;
-			*) echo "wrong choice";;
-			esac
-		done
+			select ans in "yes" "no"; do
+				case $ans in
+				yes)
+					primaryKey="PK"
+					metaData+=$"\n"$columnName$separator$columnType$separator$primaryKey
+					break
+					;;
+				no)
+					metaData+=$"\n"$columnName$separator$columnType$separator$primaryKey
+					break
+					;;
+				*) echo "wrong choice" ;;
+				esac
+			done
 		else
 			metaData+=$"\n"$columnName$separator$columnType$separator
 		fi
 
-		if [[ $counter == $colNumber ]]
-		then
+		if [[ $counter == $colNumber ]]; then
 			temp=$temp$columnName
 		else
 			temp=$temp$columnName$separator
@@ -130,11 +132,10 @@ function createTable {
 		((counter++))
 	done
 	touch .$tableName
-	echo -e $metaData >> .$tableName
+	echo -e $metaData >>.$tableName
 	touch $tableName
-	echo -e $temp >> $tableName
-	if [[ $? == 0 ]]
-	then
+	echo -e $temp >>$tableName
+	if [[ $? == 0 ]]; then
 		echo "Table Created"
 		tableMenu
 	else
@@ -144,7 +145,72 @@ function createTable {
 }
 
 function insert {
-	echo "Hello from insert"
+	echo "Enter table name to insert"
+	read tableName
+	rowSeparator="'\n'"
+	separator="#"
+	if [[ ! -f $tableName ]]; then
+		echo -e "${RED}Table doesn't exist${Color_Off}"
+		tableMenu
+	else
+		typeset -i colCount=2
+		typeset -i colsNumber=$(awk 'END{print NR}' .$tableName)
+
+		while [ $colCount -le $colsNumber ]; do
+			currentCol=$(awk -F# '{if(NR == '$colCount') print $1}' .$tableName)
+			currentType=$(awk -F# '{if(NR == '$colCount') print $2}' .$tableName)
+			isPrimary=$(awk -F# '{if(NR == '$colCount') print $3}' .$tableName)
+
+			echo "Enter value of $currentCol column"
+			read currentValue
+
+			if [[ $currentType == "str" ]]; then
+				while [[ ! $currentValue =~ ^[a-zA-Z]*$ ]]; do
+					echo "Enter value of $currentCol column"
+					read currentValue
+				done
+			elif [[ $currentType == "int" ]]; then
+				while [[ ! $currentValue =~ ^[0-9]*$ ]]; do
+					echo "Enter value of $currentCol column"
+					read currentValue
+				done
+			fi
+
+			if [[ $isPrimary == "PK" ]]; then
+				#-z check if value is empty
+				if [[ -z $currentValue ]]; then 
+					echo -e "${RED}Primary key can not be empty!${Color_Off}"
+					continue;
+				fi
+
+				primaryKey=$(cut -d# -f$(($colCount - 1)) $tableName | grep "^$currentValue")
+				
+				if [[ $primaryKey == $currentValue ]]; then
+					echo -e "${RED}Primary key found!${Color_Off}"
+					continue
+				fi
+			fi
+
+			if [[ $colCount == $colsNumber ]]; then
+				row=$row$currentValue
+			else
+				row=$row$currentValue$separator
+			fi
+			colCount=$colCount+1
+
+		done
+
+		echo $row >>$tableName 2>> ../../.error.log
+
+		if [[ $? == 0 ]]; then
+			echo -e "${GREEN}Row has been Inserted Successfully${Color_Off}"
+		else
+			echo -e "${RED}Error while Inserting Data into Table $tableName${Color_Off}"
+		fi
+		row=""
+		tableMenu
+	fi
+
 }
 
 function selectTable {
