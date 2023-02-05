@@ -1,9 +1,12 @@
 #!/bin/bash
-source ./colors.sh
+
+source ./utils/colors.sh
+source ./utils/util.sh
+
 mkdir -p ./DBMS
 echo "Weclome to our DBMS"
-echo "Made by Mustafa and Adham"
-echo -e "Under the supervision of DR.Sherine ${RED}<3${Color_Off}"
+echo -e "Made by ${Blue}${AUTHOR_ONE}${Color_Off} and ${Blue}${AUTHOR_TWO}${Color_Off}"
+echo -e "Under the supervision of ${SUPERVISOR} ${RED}<3${Color_Off}"
 
 function mainMenu {
 	echo "Enter Your choice"
@@ -68,20 +71,32 @@ function dropTable {
 }
 
 function createTable {
+	tableName=""
+	
+	while [[ -z $tableName  ]]
+	do 
 	echo "Enter table name"
 	read tableName
+	done
+
 	if [[ -f $tableName ]]; then
 		echo "Table already exists"
 		tableMenu
 	fi
 
+	
+
+	colNumber=0
+
+	while [[ colNumber -lt 1 ]]
+	do 
 	echo "Enter number of columns"
 	read colNumber
+	done
 
 	counter=1
 	primaryKey=""
-	rowSeparator="'\n'"
-	separator="#"
+	
 	metaData="field"$separator"type"$separator"pKey"
 	while [ $counter -le $colNumber ]; do
 		echo "Enter name of column no. $counter"
@@ -124,6 +139,13 @@ function createTable {
 		fi
 
 		if [[ $counter == $colNumber ]]; then
+			while [[ -z $primaryKey ]]
+			do
+				echo -e "${ORANGE}You didn't choose primary key by default last row will be the primary key${Color_Off}"
+				primaryKey="PK"
+				metaData+=$primaryKey	
+			done
+
 			temp=$temp$columnName
 		else
 			temp=$temp$columnName$separator
@@ -136,10 +158,10 @@ function createTable {
 	touch $tableName
 	echo -e $temp >>$tableName
 	if [[ $? == 0 ]]; then
-		echo "Table Created"
+		echo -e "${GREEN}Table Created${Color_Off}"
 		tableMenu
 	else
-		echo "error creating table $tableName"
+		echo -e "${RED}Error while creating table $tableName${Color_Off}"
 		tableMenu
 	fi
 }
@@ -147,8 +169,7 @@ function createTable {
 function insert {
 	echo "Enter table name to insert"
 	read tableName
-	rowSeparator="'\n'"
-	separator="#"
+
 	if [[ ! -f $tableName ]]; then
 		echo -e "${RED}Table doesn't exist${Color_Off}"
 		tableMenu
@@ -178,13 +199,13 @@ function insert {
 
 			if [[ $isPrimary == "PK" ]]; then
 				#-z check if value is empty
-				if [[ -z $currentValue ]]; then 
+				if [[ -z $currentValue ]]; then
 					echo -e "${RED}Primary key can not be empty!${Color_Off}"
-					continue;
+					continue
 				fi
 
 				primaryKey=$(cut -d# -f$(($colCount - 1)) $tableName | grep "^$currentValue")
-				
+
 				if [[ $primaryKey == $currentValue ]]; then
 					echo -e "${RED}Primary key found!${Color_Off}"
 					continue
@@ -200,7 +221,7 @@ function insert {
 
 		done
 
-		echo $row >>$tableName 2>> ../../.error.log
+		echo $row >>$tableName 2>>../../.error.log
 
 		if [[ $? == 0 ]]; then
 			echo -e "${GREEN}Row has been Inserted Successfully${Color_Off}"
@@ -226,7 +247,7 @@ function updateTable {
 }
 
 function tableMenu {
-	echo "---------- Table Menu -----------"
+	echo -e "${Blue}---------- Table Menu -----------${Color_Off}"
 	echo "1. Create Table"
 	echo "2. List Tables"
 	echo "3. Drop Table"
@@ -263,13 +284,12 @@ function createDatabase {
 		mkdir ./DBMS/$databaseName 2>>./.error.log
 		if [[ $? == 0 ]]; then
 			echo -e "${GREEN} $databaseName  has been created successfully ${Color_Off}"
-			pwd
 		else
 			echo -e "${RED}Error creating database ${Color_Off}"
 			echo -e "${RED}Database already exists ${Color_Off}"
 		fi
 	else
-		echo invalid database name
+		echo -e "${RED}Invalid database name${Color_Off}"
 	fi
 	mainMenu
 }
@@ -295,25 +315,30 @@ function dropDatabase {
 
 	rm -r ./DBMS/$databaseName 2>>./.error.log
 	if [[ $? == 0 ]]; then
-		echo -e "${GREEN} $databaseName Dropped Successfully ${Color_Off}"
+		echo -e "${GREEN}$databaseName Dropped Successfully ${Color_Off}"
 	else
-		echo -e "${RED} Error while dropping database {Color_Off}"
-		echo "${RED} Wrong name or database doesn't exist {Color_Off}"
+		echo -e "${RED}Error while dropping database ${Color_Off}"
+		echo -e "${RED}Wrong name or database doesn't exist ${Color_Off}"
 	fi
 	mainMenu
 }
 
 function connectDatabase {
+	databaseName=""
+	
+	while [[ -z $databaseName ]]
+	do
 	echo "Enter database name to connect"
 	read databaseName
-	pwd
+	done
+
 	cd DBMS/$databaseName 2>>./.error.log
 
 	if [[ $? == 0 ]]; then
-		echo -e "${GREEN} Connected to $databaseName Successfully ${Color_Off}"
+		echo -e "${GREEN}Connected to $databaseName Successfully ${Color_Off}"
 		tableMenu
 	else
-		echo -e "${RED} Error Connecting database, DB doesn't exist ${Color_Off}"
+		echo -e "${RED}Error Connecting database, DB doesn't exist ${Color_Off}"
 		mainMenu
 	fi
 }
