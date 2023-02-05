@@ -78,9 +78,44 @@ function createTable {
 	read colNumbers
 
 	counter=1
-
+	primaryKey=""
+	rowSeparator ="\n"
+	separator ="#"
+	metaData ="field"$separator"type"$separator"pKey"
 	while [ $counter -lt $colNumbers ]
 	do
+		echo "Enter name of column no. $counter"
+		read columnName
+		echo "Enter type of column $columnName  (str/int)"
+		select type in "str" "int"
+			do
+			case $type in
+			str) columnType = "str"
+					break;;
+			int) columnType = "int"
+					break;;
+			*) echo "wrong choice";;
+			esac
+		done
+
+		if [[ $primaryKey == "" ]]
+		then
+			echo "Would you like this column to be the primary key ?(yes/no)"
+			select ans in "yes" "no"
+			do
+			case $type in
+			yes) pKey="PK"
+				metaData+=$rowSeparator$column$separator$columnType$separator$pKey
+				break;;
+			no) metaData+=$rowSeparator$columnName$separator$columnType$separator$pKey
+					break;;
+			*) echo "wrong choice";;
+			esac
+		done
+		else
+			metaData+=$rowSeparator$columnName$separator$columnType$separator$pKey
+		fi
+
 	done
 	
 }
