@@ -67,7 +67,22 @@ function dropTable {
 }
 
 function createTable {
-	echo "Hello from Create table"
+	echo "Enter table name"
+	read tableName
+	if [[ -f $tableName ]]; then
+		echo "Table already exists"
+		tableMenu 
+	fi
+
+	echo "Enter number of columns"
+	read colNumbers
+
+	counter=1
+
+	while [ $counter -lt $colNumbers ]
+	do
+	done
+	
 }
 
 function insert {
@@ -101,17 +116,17 @@ function tableMenu {
 	read choice
 
 	case $choice in
-	1) createTable;;
+	1) createTable ;;
 	2) listTables ;;
 	3) dropTable ;;
 	4) insert ;;
-	5) selectTable;;
-	6) deleteFromTable;;
-	7) updateTable;;
+	5) selectTable ;;
+	6) deleteFromTable ;;
+	7) updateTable ;;
 	8) backToMain ;;
 	9) exit ;;
 	*)
-		echo -e "${RED}Invalid choice${Color_Off}";
+		echo -e "${RED}Invalid choice${Color_Off}"
 		tableMenu
 		;;
 	esac
