@@ -80,7 +80,7 @@ function createTable {
 
 	counter=1
 	primaryKey=""
-	rowSeparator="'\n'"
+	#rowSeparator="'\n'"
 	separator="#"
 	metaData="field"$separator"type"$separator"pKey"
 	while [ $counter -le $colNumber ]
