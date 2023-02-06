@@ -162,6 +162,7 @@ function createTable {
 }
 
 function insert {
+	echo -e "${Blue}---------------- Insert -------------------${Color_Off}"
 	echo "Enter table name to insert"
 	read tableName
 
@@ -230,6 +231,8 @@ function insert {
 }
 
 function selectTable {
+
+	echo -e "${Blue}-------------- Select ------------------${Color_Off}"
 	tableName=""
 
 	while [[ ! -f $tableName ]]; do
@@ -238,7 +241,7 @@ function selectTable {
 	done
 
 	echo "Enter your selection choice"
-	select choice in "Select All" "Select Column" "Table Menu" "Exit"; do
+	select choice in "Select All" "Select Column" "Select Row" "Table Menu" "Exit"; do
 		case $choice in
 		"Select All")
 			#column -t --> format table with delimiter whitespace, -s --> to specify delimiter
@@ -254,9 +257,38 @@ function selectTable {
 			done
 
 			awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE 'BEGIN{FS="'$separator'"}{if(NR==1) print H $'$colNumber' C0; else if(NR%2 == 0) print C1 $'$colNumber' C0; else print C2 $'$colNumber' C0}' $tableName
+			tableMenu
 			;;
 
-		"Table Menu") tableMenu ;;
+		"Select Row")
+			counter=0
+			choice=0
+
+			#To retrive row names
+			data=$(awk -F# '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+
+			echo "Enter row name"
+
+			for row in $data; do
+				((counter++))
+				echo "$counter. To select $row"
+			done
+
+			read choice
+
+			while [[ ! $choice =~ ^[1-$counter]$ ]]; do
+				echo -e "${RED}Enter valid choice${Color_Off}"
+				read choice
+			done
+
+			echo "Enter value to search"
+			read searchVal
+			awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE 'BEGIN{FS="#"}{if ( NR == 1 ) print H $0 C0; if ( $'$choice' == "'$searchVal'" ) { if(NR%2 == 0) print C1 $0 C0; else print C2 $0 C0}}' $tableName | column -t -s "#"
+			tableMenu
+			;;
+
+		\
+			"Table Menu") tableMenu ;;
 		"Exit") exit ;;
 		*)
 			echo -e "${RED}Invalid choice${Color_Off}"
