@@ -139,12 +139,12 @@ function createTable {
 		fi
 
 		if [[ $counter == $colNumber ]]; then
-			while [[ -z $primaryKey ]]
-			do
+			if [[ -z $primaryKey ]];
+			then
 				echo -e "${ORANGE}You didn't choose primary key by default last row will be the primary key${Color_Off}"
 				primaryKey="PK"
 				metaData+=$primaryKey	
-			done
+			fi
 
 			temp=$temp$columnName
 		else
