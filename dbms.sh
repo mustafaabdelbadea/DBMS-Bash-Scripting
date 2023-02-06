@@ -72,11 +72,10 @@ function dropTable {
 
 function createTable {
 	tableName=""
-	
-	while [[ -z $tableName  ]]
-	do 
-	echo "Enter table name"
-	read tableName
+
+	while [[ -z $tableName ]]; do
+		echo "Enter table name"
+		read tableName
 	done
 
 	if [[ -f $tableName ]]; then
@@ -84,19 +83,16 @@ function createTable {
 		tableMenu
 	fi
 
-	
-
 	colNumber=0
 
-	while [[ colNumber -lt 1 ]]
-	do 
-	echo "Enter number of columns"
-	read colNumber
+	while [[ colNumber -lt 1 ]]; do
+		echo "Enter number of columns"
+		read colNumber
 	done
 
 	counter=1
 	primaryKey=""
-	
+
 	metaData="field"$separator"type"$separator"pKey"
 	while [ $counter -le $colNumber ]; do
 		echo "Enter name of column no. $counter"
@@ -139,11 +135,10 @@ function createTable {
 		fi
 
 		if [[ $counter == $colNumber ]]; then
-			if [[ -z $primaryKey ]];
-			then
+			if [[ -z $primaryKey ]]; then
 				echo -e "${ORANGE}You didn't choose primary key by default last row will be the primary key${Color_Off}"
 				primaryKey="PK"
-				metaData+=$primaryKey	
+				metaData+=$primaryKey
 			fi
 
 			temp=$temp$columnName
@@ -237,24 +232,37 @@ function insert {
 function selectTable {
 	tableName=""
 
-	while [[ ! -f $tableName ]]
-	do 
+	while [[ ! -f $tableName ]]; do
 		echo "Enter table name"
 		read tableName
 	done
 
 	echo "Enter your selection choice"
-	select choice in  "Select All" "Table Menu" "Exit"
-	do
-	case $choice in
-	"Select All") echo hello;;
-	"Table Menu") tableMenu ;;
-	"Exit") exit ;;
-	*)
-		echo -e "${RED}Invalid choice${Color_Off}"
-		selectTable
-		;;
-	esac
+	select choice in "Select All" "Select Column" "Table Menu" "Exit"; do
+		case $choice in
+		"Select All")
+			#column -t --> format table with delimiter whitespace, -s --> to specify delimiter
+			#awk -v define variable
+			column -t -s "$separator" $tableName | awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE '{if (NR == 1) print H $0 C0; else if(NR%2 == 0) print C1 $0 C0; else print C2 $0 C0}'
+			;;
+
+		"Select Column")
+			colNumber=""
+			while [[ ! $colNumber =~ ^[1-9]+$ ]]; do
+				echo "Enter Column Number"
+				read colNumber
+			done
+
+			awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE 'BEGIN{FS="'$separator'"}{if(NR==1) print H $'$colNumber' C0; else if(NR%2 == 0) print C1 $'$colNumber' C0; else print C2 $'$colNumber' C0}' $tableName
+			;;
+
+		"Table Menu") tableMenu ;;
+		"Exit") exit ;;
+		*)
+			echo -e "${RED}Invalid choice${Color_Off}"
+			selectTable
+			;;
+		esac
 	done
 
 }
@@ -346,11 +354,10 @@ function dropDatabase {
 
 function connectDatabase {
 	databaseName=""
-	
-	while [[ -z $databaseName ]]
-	do
-	echo "Enter database name to connect"
-	read databaseName
+
+	while [[ -z $databaseName ]]; do
+		echo "Enter database name to connect"
+		read databaseName
 	done
 
 	cd DBMS/$databaseName 2>>./.error.log
