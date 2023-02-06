@@ -80,7 +80,7 @@ function createTable {
 	done
 
 	if [[ -f $tableName ]]; then
-		echo "Table already exists"
+		echo -e "${RED}Table already exists${Color_Off}"
 		tableMenu
 	fi
 
@@ -235,7 +235,28 @@ function insert {
 }
 
 function selectTable {
-	echo "select"
+	tableName=""
+
+	while [[ ! -f $tableName ]]
+	do 
+		echo "Enter table name"
+		read tableName
+	done
+
+	echo "Enter your selection choice"
+	select choice in  "Select All" "Table Menu" "Exit"
+	do
+	case $choice in
+	"Select All") echo hello;;
+	"Table Menu") tableMenu ;;
+	"Exit") exit ;;
+	*)
+		echo -e "${RED}Invalid choice${Color_Off}"
+		selectTable
+		;;
+	esac
+	done
+
 }
 
 function deleteFromTable {
