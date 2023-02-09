@@ -326,7 +326,7 @@ function selectTable {
 			tableMenu
 			;;
 
-		
+		\
 			"Table Menu") tableMenu ;;
 		"Exit")
 			exitProgram
@@ -378,7 +378,7 @@ function exportTable {
 
 			# -L is used to print null (empty cells)
 			awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $0}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $totalColumns >../../Exported/$tableName.json 2>>../../.error.log
-			
+
 			if [[ $? == 0 ]]; then
 				echo -e "${GREEN}Table Exported Successfully${Color_Off}"
 			else
@@ -390,6 +390,7 @@ function exportTable {
 		"Export Column")
 			colNumber=0
 			counter=0
+			colNameCounter=0
 
 			#To retrive columns names
 			data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
@@ -408,14 +409,22 @@ function exportTable {
 				read colNumber
 			done
 
-			# colName=""
-			# for row in $data; do
-			# 	if [[  ]]
-			# 	totalRows+=$row","
-			# done
+			colName=""
+
+			for column in $data; do
+				((colNameCounter++))
+				if [[ $colNameCounter ==  $colNumber ]]
+				then
+				colName=$column
+				fi
+			done
+
+			echo $colName
+	
 
 			# -L is used to print null (empty cells)
-			awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $'$colNumber'}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns age >../../Exported/$tableName.json 2>>../../.error.log
+			awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $'$colNumber'}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $colName >../../Exported/$tableName.json 2>>../../.error.log
+			
 			if [[ $? == 0 ]]; then
 				echo -e "${GREEN}Table Exported Successfully${Color_Off}"
 			else
