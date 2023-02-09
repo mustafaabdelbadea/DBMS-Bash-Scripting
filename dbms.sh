@@ -5,15 +5,15 @@ source ./utils/util.sh 2>>.error.log
 cat hello.txt 2>>.error.log
 
 mkdir -p ./DBMS
-echo -e "Made by ${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE} \e]8;;\a ${Color_Off} and ${Blue}${AUTHOR_TWO}${Color_Off}"
-echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE} , ${AUTHOR_TWO}\e]8;;\a ${Color_Off}"
+echo -e "Made by ${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE} \e]8;;\a ${Color_Off} and ${Blue}\e]8;;${AUTHOR_TWO_LINKEDIN}\a${AUTHOR_TWO}\e]8;;\a${Color_Off}"
+echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE}\e]8;;\a ${Color_Off}, ${Blue} \e]8;;${AUTHOR_TWO_LINKEDIN}\a${AUTHOR_TWO}\e]8;;\a ${Color_Off}"
 
 # echo -e "Under the supervision of ${SUPERVISOR} ${RED}<3${Color_Off}"
 
 function exitProgram {
 	cat exit.txt 2>>.error.log
 	echo -e "\n"
-	echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE} , ${AUTHOR_TWO} \e]8;;\a ${Color_Off}"
+	echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE}\e]8;;\a ${Color_Off}, ${Blue} \e]8;;${AUTHOR_TWO_LINKEDIN}\a${AUTHOR_TWO}\e]8;;\a ${Color_Off}"
 }
 
 function mainMenu {
