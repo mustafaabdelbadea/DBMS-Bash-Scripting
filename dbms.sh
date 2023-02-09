@@ -265,11 +265,11 @@ function selectTable {
 			#To retrive columns names
 			data=$(awk -F# '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
 
-			echo "Enter row name"
+			echo "Enter column name"
 
-			for row in $data; do
+			for column in $data; do
 				((counter++))
-				echo "$counter. To select $row"
+				echo "$counter. To select $column"
 			done
 
 			read colNumber
