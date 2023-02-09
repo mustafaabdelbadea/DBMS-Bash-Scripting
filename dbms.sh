@@ -246,17 +246,37 @@ function selectTable {
 		"Select All")
 			#column -t --> format table with delimiter whitespace, -s --> to specify delimiter
 			#awk -v define variable
-			column -t -s "$separator" $tableName | awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE '{if (NR == 1) print H $0 C0; else if(NR%2 == 0) print C1 $0 C0; else print C2 $0 C0}'
+			column -t -s "$separator" $tableName | awk -v counter=0 -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE -v C3=$Cyan '{ if (NR == 1) print H $0 C0; else if(NR%2 == 0) print C1 $0 C0; else print C2 $0 C0;} END{print C3 "Total number of rows = "((NR-1)) C0}'
+			tableMenu
 			;;
 
 		"Select Column")
-			colNumber=""
-			while [[ ! $colNumber =~ ^[1-9]+$ ]]; do
-				echo "Enter Column Number"
+			colNumber=0
+			counter=0
+
+			#To retrive columns names
+			data=$(awk -F# '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+
+			echo "Enter row name"
+
+			for row in $data; do
+				((counter++))
+				echo "$counter. To select $row"
+			done
+
+			read colNumber
+
+			while [[ ! $colNumber =~ ^[1-$counter]$ ]]; do
+				echo -e "${RED}Enter valid choice${Color_Off}"
 				read colNumber
 			done
 
-			awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE 'BEGIN{FS="'$separator'"}{if(NR==1) print H $'$colNumber' C0; else if(NR%2 == 0) print C1 $'$colNumber' C0; else print C2 $'$colNumber' C0}' $tableName
+			# while [[ ! $colNumber =~ ^[1-9]+$ ]]; do
+			# 	echo "Enter Column Number"
+			# 	read colNumber
+			# done
+
+			awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE -v C3=$Cyan 'BEGIN{FS="'$separator'"}{if(NR==1) print H $'$colNumber' C0; else if(NR%2 == 0) print C1 $'$colNumber' C0; else print C2 $'$colNumber' C0} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
 			tableMenu
 			;;
 
@@ -283,11 +303,21 @@ function selectTable {
 
 			echo "Enter value to search"
 			read searchVal
-			awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE 'BEGIN{FS="#"}{if ( NR == 1 ) print H $0 C0; if ( $'$choice' == "'$searchVal'" ) { if(NR%2 == 0) print C1 $0 C0; else print C2 $0 C0}}' $tableName | column -t -s "#"
+			awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE -v rowsCount=0 -v C3=$Cyan 'BEGIN{FS="#"}{if ( NR == 1 ) print H $0 C0; if ( $'$choice' == "'$searchVal'" ) {  ((rowsCount++)); if(NR%2 == 0) print C1 $0 C0; else print C2 $0 C0}} END{print C3 "Total number of rows = "rowsCount C0}' $tableName | column -t -s "#"
+
+			# totalRows=""
+			# for row in $data; do
+			# 	totalRows+=$row","
+			# done 
+
+			# echo $totalRows
+
+			#  awk  'BEGIN{FS="#"}{if ( $'$choice' == "'$searchVal'" ) print $0 }' $tableName | column -t -J  -s "#" -J --table-columns $totalRows > $tableName.json
+
 			tableMenu
 			;;
 
-		\
+		
 			"Table Menu") tableMenu ;;
 		"Exit") exit ;;
 		*)
