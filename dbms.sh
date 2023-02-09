@@ -1,12 +1,20 @@
 #!/bin/bash
 
-source ./utils/colors.sh
-source ./utils/util.sh
+source ./utils/colors.sh 2>>.error.log
+source ./utils/util.sh 2>>.error.log
+cat hello.txt 2>>.error.log
 
 mkdir -p ./DBMS
-echo "Weclome to our DBMS"
-echo -e "Made by ${Blue}${AUTHOR_ONE}${Color_Off} and ${Blue}${AUTHOR_TWO}${Color_Off}"
-echo -e "Under the supervision of ${SUPERVISOR} ${RED}<3${Color_Off}"
+echo -e "Made by ${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE} \e]8;;\a ${Color_Off} and ${Blue}${AUTHOR_TWO}${Color_Off}"
+echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE} \e]8;;\a ${Color_Off}"
+
+# echo -e "Under the supervision of ${SUPERVISOR} ${RED}<3${Color_Off}"
+
+function exitProgram {
+	cat exit.txt 2>>.error.log
+	echo -e "\n"
+	echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE} \e]8;;\a ${Color_Off}"
+}
 
 function mainMenu {
 	echo "Enter Your choice"
@@ -21,7 +29,7 @@ function mainMenu {
 	2) listDatabases ;;
 	3) connectDatabase ;;
 	4) dropDatabase ;;
-	5) exit ;;
+	5) exitProgram; exit ;;
 	*) mainMenu ;;
 	esac
 }
@@ -319,7 +327,7 @@ function selectTable {
 
 		
 			"Table Menu") tableMenu ;;
-		"Exit") exit ;;
+		"Exit") exitProgram; exit ;;
 		*)
 			echo -e "${RED}Invalid choice${Color_Off}"
 			selectTable
@@ -360,7 +368,7 @@ function tableMenu {
 	6) deleteFromTable ;;
 	7) updateTable ;;
 	8) backToMain ;;
-	9) exit ;;
+	9) exitProgram; exit ;;
 	*)
 		echo -e "${RED}Invalid choice${Color_Off}"
 		tableMenu

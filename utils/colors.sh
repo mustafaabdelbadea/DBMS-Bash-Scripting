@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# install figlet
+# blue "$(figlet -c -f big "iti DBMS !")" > DBMS.txt
 
 #  --------------------  Colors Map ----------------------
 # Octal Colors
