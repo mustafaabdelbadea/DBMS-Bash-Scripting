@@ -98,11 +98,11 @@ function createTable {
 	fi
 
 	colNumber=0
-	
+
 	echo "Enter number of columns"
 	read colNumber
 
-	while [[ ! $colNumber =~ ^[1-9]+$  ]]; do
+	while [[ ! $colNumber =~ ^[1-9]+$ ]]; do
 		echo -e "${RED}Enter a Valid number of columns${Color_Off}"
 		read colNumber
 	done
@@ -200,12 +200,12 @@ function insert {
 
 			if [[ $currentType == "str" ]]; then
 				while [[ ! $currentValue =~ ^[a-zA-Z]*$ ]]; do
-					echo "Enter value of $currentCol column"
+					echo -e "${RED}Enter value of $currentCol column${Color_Off}"
 					read currentValue
 				done
 			elif [[ $currentType == "int" ]]; then
 				while [[ ! $currentValue =~ ^[0-9]*$ ]]; do
-					echo "Enter value of $currentCol column"
+					echo -e "${RED}Enter value of $currentCol column${Color_Off}"
 					read currentValue
 				done
 			fi
@@ -331,7 +331,7 @@ function selectTable {
 		
 			"Table Menu") tableMenu ;;
 		"Exit")
-			 exitFromSubTable
+			exitFromSubTable
 			exit
 			;;
 		*)
@@ -349,9 +349,9 @@ function deleteFromTable {
 function updateColumns {
 	colNumberUpdate=0
 	counter=0
+
 	#To retrive columns names
 	data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
-	echo $data
 
 	echo "Choose column you want to update in"
 	for column in $data; do
@@ -368,31 +368,55 @@ function updateColumns {
 
 	isPrimary=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $3}' .$tableName)
 
-	echo $colNumberUpdate
-	echo $isPrimary
-
 	if [[ $isPrimary == "PK" ]]; then
-		echo "Can't update the Primary key column"
-		echo "Choose the right table name or column"
+		echo -e "${RED}Can't update the Primary key column${Color_Off}"
+		echo -e "${RED}Choose the right table name or column${Color_Off}"
 
 		updateTable
 	else
-		typeset -i rowCount=2
-		typeset -i numOfRows=$(awk 'END{print NR}' $tableName)
-		echo "Not Primary"
-		echo "Enter The new Value"
+
+		validationCol=$colNumberUpdate+1
+
+		currentCol=$(awk -F$separator '{if(NR == '$validationCol') print $1}' .$tableName)
+		currentType=$(awk -F$separator '{if(NR == '$validationCol') print $2}' .$tableName)
+
+		echo "Enter the new value of $currentCol column"
 		read newValue
-		while [[ $rowCount -le $numOfRows ]]; do
-			#numOfRows=$(awk -F '#' '{if (NR>1) {print NR} }' $tableName)
-			#oldValue=$(awk -F '#' '{if (NR=='$rowCount') {print $'$colNumberUpdate'} }' $tableName)
-			#oldValue=$(awk -F '#' '{ if (NR>1) {print $'$colNumberUpdate'} }' $tableName)
-			#echo $oldValue
-			#sed -i ''$rowCount's/'$oldValue'/'$newValue'/g' $tableName #2>> ./.error.log
-			#echo $colNumberUpdate
-			pwd
-			awk -F '#' -v colNumberUpdate=$colNumberUpdate -v newValue=$newValue -v rowCount=$rowCount 'BEGIN {FS="'$separator'"} {if (NR==rowCount) {$colNumberUpdate=newValue }}' $tableName
-			((rowCount++))
-		done
+
+		if [[ $currentType == "str" ]]; then
+			while [[ ! $newValue =~ ^[a-zA-Z]*$ ]]; do
+				echo -e "${RED}Enter valid value of $currentCol column${Color_Off}"
+				read newValue
+			done
+		elif [[ $currentType == "int" ]]; then
+			while [[ ! $newValue =~ ^[0-9]*$ ]]; do
+				echo -e "${RED}Enter valid value of $currentCol column${Color_Off}" 
+				read newValue
+			done
+		fi
+
+		# while [[ $rowCount -le $numOfRows ]]; do
+		# 	#numOfRows=$(awk -F '#' '{if (NR>1) {print NR} }' $tableName)
+		# 	#oldValue=$(awk -F '#' '{if (NR=='$rowCount') {print $'$colNumberUpdate'} }' $tableName)
+		# 	#oldValue=$(awk -F '#' '{ if (NR>1) {print $'$colNumberUpdate'} }' $tableName)
+		# 	#echo $oldValue
+		# 	#sed -i ''$rowCount's/'$oldValue'/'$newValue'/g' $tableName #2>> ./.error.log
+		# 	#echo $colNumberUpdate
+		# 	pwd
+		# 	((rowCount++))
+		# done
+
+		echo $newValue
+		echo $colNumberUpdate
+
+		awk -v C0=$Color_Off -v C3=$Cyan  -v colNumberUpdate=$colNumberUpdate -v newValue=$newValue 'BEGIN {FS = OFS="'$separator'"} {if(NR > 1) {sub($colNumberUpdate,newValue,$colNumberUpdate)} print $0 >"'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
+
+		if [[ $? == 0 ]]; then
+			echo -e "${GREEN}Updated Successfully${Color_Off}"
+		else
+			echo -e "${RED}Error while Updating Table $tableName${Color_Off}"
+		fi
+
 		tableMenu
 	fi
 }
@@ -423,7 +447,7 @@ function updateTable {
 			updateRows
 			;;
 		"Exit")
-			 exitFromSubTable
+			exitFromSubTable
 			exit
 			;;
 		*)
@@ -561,9 +585,9 @@ function exportTable {
 			tableMenu
 			;;
 
-			"Table Menu") tableMenu ;;
+		"Table Menu") tableMenu ;;
 		"Exit")
-			 exitFromSubTable
+			exitFromSubTable
 			exit
 			;;
 		*)
@@ -598,7 +622,8 @@ function tableMenu {
 	7) updateTable ;;
 	8) exportTable ;;
 	9) backToMain ;;
-	10) exitFromSubTable
+	10)
+		exitFromSubTable
 		exit
 		;;
 	*)
