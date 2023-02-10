@@ -342,8 +342,84 @@ function selectTable {
 
 }
 
+function deleteRows {
+	echo helllo
+}
+
+function deleteColumn {
+	colNumberDelete=0
+	counter=0
+
+	#To retrive columns names
+	data=$(cat .$tableName | wc -l)
+	data=$((data-1))
+	echo $data
+	echo "Enter column you want to delete in"
+	read colNumberDelete
+
+	while [[ ! $colNumberDelete =~ ^[1-$data]$ ]]; do
+		echo -e "${RED}Enter valid choice${Color_Off}"
+		read colNumberDelete
+	done
+
+	isPrimary=$(awk -F$separator '{if(NR == '$colNumberDelete+1') print $3}' .$tableName)
+
+	if [[ $isPrimary == "PK" ]]; then
+		echo -e "${RED}Can't delete the Primary key column${Color_Off}"
+		echo -e "${RED}Choose the right table name or column${Color_Off}"
+
+		deleteColumn
+	else
+
+		getCol=$colNumberDelete+1
+
+		awk -v C0=$Color_Off -v C3=$Cyan  -v colNumberUpdate=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"} {sub($colNumberUpdate,"",$colNumberUpdate);print $0 >"'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
+
+		if [[ $? == 0 ]]; then
+			sed $getCol'd' .$tableName > .$tableName
+			if [[ $? == 0 ]]; then
+				echo -e "${GREEN}Updated Successfully${Color_Off}"
+			else
+				echo -e "${RED}Error while Updating Table $tableName${Color_Off}"
+			fi
+		else
+			echo -e "${RED}Error while Updating Table $tableName${Color_Off}"
+		fi
+
+		tableMenu
+	fi
+}
+
 function deleteFromTable {
-	echo "delete"
+	tableName=""
+
+	echo "Enter table name"
+	read tableName
+
+	while [[ ! -f $tableName ]]; do
+		echo -e "${RED}Enter valid table name${Color_Off}"
+		read tableName
+	done
+
+	echo "Enter your delete choice"
+
+	select choice in "Delete a column" "Dalete Rows" "Exit"; do
+		case $choice in
+		"Delete a column")
+			deleteColumn
+			;;
+		"Delete Rows")
+			deleteRows
+			;;
+		"Exit")
+			exitFromSubTable
+			exit
+			;;
+		*)
+			echo -e "${RED}Invalid Choice${Color_Off}"
+			;;
+		esac
+	done
 }
 
 function updateColumns {
@@ -455,7 +531,6 @@ function updateTable {
 			;;
 		esac
 	done
-	# awk -v rowsCount=0 'BEGIN{FS="'$separator'"}{if ( $'$choice' == "'$searchVal'" ) {  ((rowsCount++)); if(NR%2 == 0) print  $0 ; else print $0 }} END{print C3 "Total number of rows = "rowsCount C0}' $tableName | column -t -s "$separator"
 }
 
 function exportTable {
