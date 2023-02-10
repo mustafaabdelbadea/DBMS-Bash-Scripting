@@ -74,7 +74,8 @@ function dropTable {
 		echo "Back"
 		tableMenu
 	else
-		rm ./.$choice 2>>../../.error.log
+		pwd
+		rm .$choice 2>>../../.error.log
 		rm $choice 2>>../../.error.log
 		if [[ $? == 0 ]]; then
 			echo -e "${GREEN}DB $choice Deleted Successfully${Color_Off}"
@@ -393,15 +394,18 @@ function updateTable {
 									while [[ $rowCount -le $numOfRows ]]
 									do
 									#numOfRows=$(awk -F '#' '{if (NR>1) {print NR} }' $tableName)
-									oldValue=$(awk -F '#' '{if (NR=='$rowCount') {print $'$colNumberUpdate'} }' $tableName)
-									echo $oldValue
-									sed -i ''$rowCount's/'$oldValue'/'$newValue'/g' $tableName #2>> ./.error.log
-									#sed -i -e 's/'$oldValues'/'$newValue'/g' $tableName
+									#oldValue=$(awk -F '#' '{if (NR=='$rowCount') {print $'$colNumberUpdate'} }' $tableName)
+									#oldValue=$(awk -F '#' '{ if (NR>1) {print $'$colNumberUpdate'} }' $tableName)
+									#echo $oldValue
+									#sed -i ''$rowCount's/'$oldValue'/'$newValue'/g' $tableName #2>> ./.error.log
+									#echo $colNumberUpdate
+									pwd
+									awk -F '#' -v colNumberUpdate=$colNumberUpdate -v newValue=$newValue -v rowCount=$rowCount 'BEGIN {FS="'$separator'"} {if (NR==rowCount) {$colNumberUpdate=newValue }}' $tableName
 									((rowCount++))
-									done
-									tableMenu
+									done	
+									tableMenu	
 								fi
-								
+							
 							;;
 		"Exit")
 				exit
