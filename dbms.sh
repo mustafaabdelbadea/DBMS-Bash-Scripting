@@ -347,75 +347,73 @@ function deleteFromTable {
 }
 
 function updateTable {
-		tableName=""
-		echo "Enter table name"
+	tableName=""
+	echo "Enter table name"
+	read tableName
+	while [[ ! -f $tableName ]]; do
+		echo -e "${RED}Enter valid table name${Color_Off}"
 		read tableName
-		while [[ ! -f $tableName ]]; do
-			echo -e "${RED}Enter valid table name${Color_Off}"
-			read tableName
-		done
-		echo "Enter your update choice"
-	select choice in "Update a whole column" "Exit"
-	do
+	done
+	echo "Enter your update choice"
+	select choice in "Update a whole column" "Exit"; do
 		case $choice in
 		"Update a whole column")
-								colNumberUpdate=0
-								counter=0
-								#To retrive columns names
-								data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
-								echo $data
+			colNumberUpdate=0
+			counter=0
+			#To retrive columns names
+			data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+			echo $data
 
-								echo "Choose column you want to update in"
-								for column in $data; do
-									((counter++))
-									echo "$counter. To select $column"
-								done
+			echo "Choose column you want to update in"
+			for column in $data; do
+				((counter++))
+				echo "$counter. To select $column"
+			done
 
-								read colNumberUpdate
+			read colNumberUpdate
 
-								while [[ ! $colNumberUpdate =~ ^[1-$counter]$ ]]; do
-									echo -e "${RED}Enter valid choice${Color_Off}"
-									read colNumberUpdate
-								done
-								isPrimary=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $3}' .$tableName)
-								echo $colNumberUpdate
-								echo $isPrimary
-								if [[ $isPrimary == "PK" ]]
-								then
-									echo "Can't update the Primary key column"
-									echo "Choose the right table name or column"
-									updateTable
-								else
-									typeset -i rowCount=2
-									typeset -i numOfRows=$(awk 'END{print NR}' $tableName)
-									echo "Not Primary"
-									echo "Enter The new Value"
-									read newValue
-									while [[ $rowCount -le $numOfRows ]]
-									do
-									#numOfRows=$(awk -F '#' '{if (NR>1) {print NR} }' $tableName)
-									#oldValue=$(awk -F '#' '{if (NR=='$rowCount') {print $'$colNumberUpdate'} }' $tableName)
-									#oldValue=$(awk -F '#' '{ if (NR>1) {print $'$colNumberUpdate'} }' $tableName)
-									#echo $oldValue
-									#sed -i ''$rowCount's/'$oldValue'/'$newValue'/g' $tableName #2>> ./.error.log
-									#echo $colNumberUpdate
-									pwd
-									awk -F '#' -v colNumberUpdate=$colNumberUpdate -v newValue=$newValue -v rowCount=$rowCount 'BEGIN {FS="'$separator'"} {if (NR==rowCount) {$colNumberUpdate=newValue }}' $tableName
-									((rowCount++))
-									done	
-									tableMenu	
-								fi
-							
-							;;
+			while [[ ! $colNumberUpdate =~ ^[1-$counter]$ ]]; do
+				echo -e "${RED}Enter valid choice${Color_Off}"
+				read colNumberUpdate
+			done
+			isPrimary=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $3}' .$tableName)
+			echo $colNumberUpdate
+			echo $isPrimary
+			if [[ $isPrimary == "PK" ]]; then
+				echo "Can't update the Primary key column"
+				echo "Choose the right table name or column"
+				updateTable
+			else
+				typeset -i rowCount=2
+				typeset -i numOfRows=$(awk 'END{print NR}' $tableName)
+				echo "Not Primary"
+				echo "Enter The new Value"
+				read newValue
+				while [[ $rowCount -le $numOfRows ]]; do
+					#numOfRows=$(awk -F '#' '{if (NR>1) {print NR} }' $tableName)
+					#oldValue=$(awk -F '#' '{if (NR=='$rowCount') {print $'$colNumberUpdate'} }' $tableName)
+					#oldValue=$(awk -F '#' '{ if (NR>1) {print $'$colNumberUpdate'} }' $tableName)
+					#echo $oldValue
+					#sed -i ''$rowCount's/'$oldValue'/'$newValue'/g' $tableName #2>> ./.error.log
+					#echo $colNumberUpdate
+					pwd
+					awk -F '#' -v colNumberUpdate=$colNumberUpdate -v newValue=$newValue -v rowCount=$rowCount 'BEGIN {FS="'$separator'"} {if (NR==rowCount) {$colNumberUpdate=newValue }}' $tableName
+					((rowCount++))
+				done
+				tableMenu
+			fi
+
+			;;
 		"Exit")
-				exit
-				;;
-		*)	echo "Invalid Choice "
+			exit
+			;;
+		*)
+			echo "Invalid Choice "
 			updateTable
 			;;
 		esac
 	done
-		# awk -v rowsCount=0 'BEGIN{FS="'$separator'"}{if ( $'$choice' == "'$searchVal'" ) {  ((rowsCount++)); if(NR%2 == 0) print  $0 ; else print $0 }} END{print C3 "Total number of rows = "rowsCount C0}' $tableName | column -t -s "$separator"
+	# awk -v rowsCount=0 'BEGIN{FS="'$separator'"}{if ( $'$choice' == "'$searchVal'" ) {  ((rowsCount++)); if(NR%2 == 0) print  $0 ; else print $0 }} END{print C3 "Total number of rows = "rowsCount C0}' $tableName | column -t -s "$separator"
 }
 
 function exportTable {
@@ -430,6 +428,9 @@ function exportTable {
 		echo -e "${RED}Enter valid table name${Color_Off}"
 		read tableName
 	done
+
+	timeStamp=$(date +%s)
+	fileName=${tableName}${timeStamp}
 
 	echo "Enter your export choice"
 	select choice in "Export All" "Export Column" "Export Row" "Table Menu" "Exit"; do
@@ -446,7 +447,7 @@ function exportTable {
 			done
 
 			# -L is used to print null (empty cells)
-			awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $0}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $totalColumns >../../Exported/$tableName.json 2>>../../.error.log
+			awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $0}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $totalColumns >../../Exported/$fileName.json 2>>../../.error.log
 
 			if [[ $? == 0 ]]; then
 				echo -e "${GREEN}Table Exported Successfully${Color_Off}"
@@ -482,18 +483,16 @@ function exportTable {
 
 			for column in $data; do
 				((colNameCounter++))
-				if [[ $colNameCounter ==  $colNumber ]]
-				then
-				colName=$column
+				if [[ $colNameCounter == $colNumber ]]; then
+					colName=$column
 				fi
 			done
 
-			echo $colName
-	
+			timeStamp=$(date +%s)
 
 			# -L is used to print null (empty cells)
-			awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $'$colNumber'}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $colName >../../Exported/$tableName.json 2>>../../.error.log
-			
+			awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $'$colNumber'}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $colName >../../Exported/$fileName.json 2>>../../.error.log
+
 			if [[ $? == 0 ]]; then
 				echo -e "${GREEN}Table Exported Successfully${Color_Off}"
 			else
@@ -533,7 +532,7 @@ function exportTable {
 			done
 
 			# -L is used to print null (empty cells)
-			awk 'BEGIN{FS="'$separator'"}{if ( $'$choice' == "'$searchVal'" ) print $0 }' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $totalColumns >../../Exported/$tableName.json 2>>../../.error.log
+			awk 'BEGIN{FS="'$separator'"}{if ( $'$choice' == "'$searchVal'" ) print $0 }' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $totalColumns >../../Exported/$fileName.json 2>>../../.error.log
 
 			if [[ $? == 0 ]]; then
 				echo -e "${GREEN}Table Exported Successfully${Color_Off}"
