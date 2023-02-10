@@ -1,11 +1,13 @@
 #!/bin/bash
 
-AUTHOR_ONE="Mustafa Abdelbadea"
-AUTHOR_TWO="Adham Gaber"
+function exitProgram {
+	cat exit.txt 2>>.error.log
+	echo -e "\n"
+	echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE}\e]8;;\a ${Color_Off}, ${Blue} \e]8;;${AUTHOR_TWO_LINKEDIN}\a${AUTHOR_TWO}\e]8;;\a ${Color_Off}"
+}
 
-# SUPERVISOR="DR.Sherine"
-
-separator="#"
-
-AUTHOR_ONE_LINKEDIN="https://www.linkedin.com/in/mustafa-abdelbadea/"
-AUTHOR_TWO_LINKEDIN="https://www.linkedin.com/in/adhammgaber/"
+function exitFromSubTable {
+	cat ../../exit.txt 2>>.error.log
+	echo -e "\n"
+	echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE}\e]8;;\a ${Color_Off}, ${Blue} \e]8;;${AUTHOR_TWO_LINKEDIN}\a${AUTHOR_TWO}\e]8;;\a ${Color_Off}"
+}

@@ -2,6 +2,7 @@
 
 source ./utils/colors.sh 2>>.error.log
 source ./utils/util.sh 2>>.error.log
+source ./utils/env.sh 2>>.error.log
 
 clear
 
@@ -13,12 +14,6 @@ echo -e "Made by ${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE} \e]8;;\a ${
 echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE}\e]8;;\a ${Color_Off}, ${Blue} \e]8;;${AUTHOR_TWO_LINKEDIN}\a${AUTHOR_TWO}\e]8;;\a ${Color_Off}"
 
 # echo -e "Under the supervision of ${SUPERVISOR} ${RED}<3${Color_Off}"
-
-function exitProgram {
-	cat exit.txt 2>>.error.log
-	echo -e "\n"
-	echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE}\e]8;;\a ${Color_Off}, ${Blue} \e]8;;${AUTHOR_TWO_LINKEDIN}\a${AUTHOR_TWO}\e]8;;\a ${Color_Off}"
-}
 
 function mainMenu {
 	echo "Enter Your choice"
@@ -327,15 +322,14 @@ function selectTable {
 			tableMenu
 			;;
 
-		\
+		
 			"Table Menu") tableMenu ;;
 		"Exit")
-			exitProgram
+			 exitFromSubTable
 			exit
 			;;
 		*)
 			echo -e "${RED}Invalid choice${Color_Off}"
-			selectTable
 			;;
 		esac
 	done
@@ -346,70 +340,88 @@ function deleteFromTable {
 	echo "delete"
 }
 
+function updateColumns {
+	colNumberUpdate=0
+	counter=0
+	#To retrive columns names
+	data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+	echo $data
+
+	echo "Choose column you want to update in"
+	for column in $data; do
+		((counter++))
+		echo "$counter. To select $column"
+	done
+
+	read colNumberUpdate
+
+	while [[ ! $colNumberUpdate =~ ^[1-$counter]$ ]]; do
+		echo -e "${RED}Enter valid choice${Color_Off}"
+		read colNumberUpdate
+	done
+
+	isPrimary=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $3}' .$tableName)
+
+	echo $colNumberUpdate
+	echo $isPrimary
+
+	if [[ $isPrimary == "PK" ]]; then
+		echo "Can't update the Primary key column"
+		echo "Choose the right table name or column"
+
+		updateTable
+	else
+		typeset -i rowCount=2
+		typeset -i numOfRows=$(awk 'END{print NR}' $tableName)
+		echo "Not Primary"
+		echo "Enter The new Value"
+		read newValue
+		while [[ $rowCount -le $numOfRows ]]; do
+			#numOfRows=$(awk -F '#' '{if (NR>1) {print NR} }' $tableName)
+			#oldValue=$(awk -F '#' '{if (NR=='$rowCount') {print $'$colNumberUpdate'} }' $tableName)
+			#oldValue=$(awk -F '#' '{ if (NR>1) {print $'$colNumberUpdate'} }' $tableName)
+			#echo $oldValue
+			#sed -i ''$rowCount's/'$oldValue'/'$newValue'/g' $tableName #2>> ./.error.log
+			#echo $colNumberUpdate
+			pwd
+			awk -F '#' -v colNumberUpdate=$colNumberUpdate -v newValue=$newValue -v rowCount=$rowCount 'BEGIN {FS="'$separator'"} {if (NR==rowCount) {$colNumberUpdate=newValue }}' $tableName
+			((rowCount++))
+		done
+		tableMenu
+	fi
+}
+
+function updateRows {
+	echo hello
+}
+
 function updateTable {
 	tableName=""
+
 	echo "Enter table name"
 	read tableName
+
 	while [[ ! -f $tableName ]]; do
 		echo -e "${RED}Enter valid table name${Color_Off}"
 		read tableName
 	done
+
 	echo "Enter your update choice"
-	select choice in "Update a whole column" "Exit"; do
+
+	select choice in "Update a whole column" "Update Rows" "Exit"; do
 		case $choice in
 		"Update a whole column")
-			colNumberUpdate=0
-			counter=0
-			#To retrive columns names
-			data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
-			echo $data
-
-			echo "Choose column you want to update in"
-			for column in $data; do
-				((counter++))
-				echo "$counter. To select $column"
-			done
-
-			read colNumberUpdate
-
-			while [[ ! $colNumberUpdate =~ ^[1-$counter]$ ]]; do
-				echo -e "${RED}Enter valid choice${Color_Off}"
-				read colNumberUpdate
-			done
-			isPrimary=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $3}' .$tableName)
-			echo $colNumberUpdate
-			echo $isPrimary
-			if [[ $isPrimary == "PK" ]]; then
-				echo "Can't update the Primary key column"
-				echo "Choose the right table name or column"
-				updateTable
-			else
-				typeset -i rowCount=2
-				typeset -i numOfRows=$(awk 'END{print NR}' $tableName)
-				echo "Not Primary"
-				echo "Enter The new Value"
-				read newValue
-				while [[ $rowCount -le $numOfRows ]]; do
-					#numOfRows=$(awk -F '#' '{if (NR>1) {print NR} }' $tableName)
-					#oldValue=$(awk -F '#' '{if (NR=='$rowCount') {print $'$colNumberUpdate'} }' $tableName)
-					#oldValue=$(awk -F '#' '{ if (NR>1) {print $'$colNumberUpdate'} }' $tableName)
-					#echo $oldValue
-					#sed -i ''$rowCount's/'$oldValue'/'$newValue'/g' $tableName #2>> ./.error.log
-					#echo $colNumberUpdate
-					pwd
-					awk -F '#' -v colNumberUpdate=$colNumberUpdate -v newValue=$newValue -v rowCount=$rowCount 'BEGIN {FS="'$separator'"} {if (NR==rowCount) {$colNumberUpdate=newValue }}' $tableName
-					((rowCount++))
-				done
-				tableMenu
-			fi
-
+			updateColumns
+			;;
+		"Update Rows")
+			updateRows
 			;;
 		"Exit")
+			 exitFromSubTable
 			exit
 			;;
 		*)
-			echo "Invalid Choice "
-			updateTable
+			echo -e "${RED}Invalid Choice${Color_Off}"
 			;;
 		esac
 	done
@@ -543,15 +555,13 @@ function exportTable {
 			tableMenu
 			;;
 
-		\
 			"Table Menu") tableMenu ;;
 		"Exit")
-			exitProgram
+			 exitFromSubTable
 			exit
 			;;
 		*)
 			echo -e "${RED}Invalid choice${Color_Off}"
-			selectTable
 			;;
 		esac
 	done
@@ -582,8 +592,7 @@ function tableMenu {
 	7) updateTable ;;
 	8) exportTable ;;
 	9) backToMain ;;
-	10)
-		exitProgram
+	10) exitFromSubTable
 		exit
 		;;
 	*)
