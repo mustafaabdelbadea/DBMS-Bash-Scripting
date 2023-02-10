@@ -192,7 +192,7 @@ function insert {
 			currentCol=$(awk -F$separator '{if(NR == '$colCount') print $1}' .$tableName)
 			currentType=$(awk -F$separator '{if(NR == '$colCount') print $2}' .$tableName)
 			isPrimary=$(awk -F$separator '{if(NR == '$colCount') print $3}' .$tableName)
-
+			echo $isPrimary
 			echo "Enter value of $currentCol column"
 			read currentValue
 
@@ -346,7 +346,72 @@ function deleteFromTable {
 }
 
 function updateTable {
-	echo "update"
+		tableName=""
+		echo "Enter table name"
+		read tableName
+		while [[ ! -f $tableName ]]; do
+			echo -e "${RED}Enter valid table name${Color_Off}"
+			read tableName
+		done
+		echo "Enter your update choice"
+	select choice in "Update a whole column" "Exit"
+	do
+		case $choice in
+		"Update a whole column")
+								colNumberUpdate=0
+								counter=0
+								#To retrive columns names
+								data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+								echo $data
+
+								echo "Choose column you want to update in"
+								for column in $data; do
+									((counter++))
+									echo "$counter. To select $column"
+								done
+
+								read colNumberUpdate
+
+								while [[ ! $colNumberUpdate =~ ^[1-$counter]$ ]]; do
+									echo -e "${RED}Enter valid choice${Color_Off}"
+									read colNumberUpdate
+								done
+								isPrimary=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $3}' .$tableName)
+								echo $colNumberUpdate
+								echo $isPrimary
+								if [[ $isPrimary == "PK" ]]
+								then
+									echo "Can't update the Primary key column"
+									echo "Choose the right table name or column"
+									updateTable
+								else
+									typeset -i rowCount=2
+									typeset -i numOfRows=$(awk 'END{print NR}' $tableName)
+									echo "Not Primary"
+									echo "Enter The new Value"
+									read newValue
+									while [[ $rowCount -le $numOfRows ]]
+									do
+									#numOfRows=$(awk -F '#' '{if (NR>1) {print NR} }' $tableName)
+									oldValue=$(awk -F '#' '{if (NR=='$rowCount') {print $'$colNumberUpdate'} }' $tableName)
+									echo $oldValue
+									sed -i ''$rowCount's/'$oldValue'/'$newValue'/g' $tableName #2>> ./.error.log
+									#sed -i -e 's/'$oldValues'/'$newValue'/g' $tableName
+									((rowCount++))
+									done
+									tableMenu
+								fi
+								
+							;;
+		"Exit")
+				exit
+				;;
+		*)	echo "Invalid Choice "
+			updateTable
+			;;
+		esac
+	done
+		# awk -v rowsCount=0 'BEGIN{FS="'$separator'"}{if ( $'$choice' == "'$searchVal'" ) {  ((rowsCount++)); if(NR%2 == 0) print  $0 ; else print $0 }} END{print C3 "Total number of rows = "rowsCount C0}' $tableName | column -t -s "$separator"
 }
 
 function exportTable {
