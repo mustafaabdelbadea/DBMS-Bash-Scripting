@@ -84,8 +84,11 @@ function dropTable {
 function createTable {
 	tableName=""
 
-	while [[ -z $tableName ]]; do
-		echo "Enter table name"
+	echo "Enter table name"
+	read tableName
+
+	while [[ ! $tableName =~ ^[a-zA-Z]+$ ]]; do
+		echo -e "${RED}Enter a Vaild Name${Color_Off}"
 		read tableName
 	done
 
@@ -95,9 +98,12 @@ function createTable {
 	fi
 
 	colNumber=0
+	
+	echo "Enter number of columns"
+	read colNumber
 
-	while [[ colNumber -lt 1 ]]; do
-		echo "Enter number of columns"
+	while [[ ! $colNumber =~ ^[1-9]+$  ]]; do
+		echo -e "${RED}Enter a Valid number of columns${Color_Off}"
 		read colNumber
 	done
 
