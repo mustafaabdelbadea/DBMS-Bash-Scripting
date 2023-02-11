@@ -83,7 +83,7 @@ function dropTable {
 
 function createTable {
 	tableName=""
-
+	metaData=""
 	echo "Enter table name"
 	read tableName
 
@@ -343,7 +343,7 @@ function selectTable {
 }
 
 function deleteRows {
-	echo helllo
+	echo "Hello"
 }
 
 function deleteColumn {
@@ -351,19 +351,16 @@ function deleteColumn {
 	counter=0
 
 	#To retrive columns names
-	data=$(cat .$tableName | wc -l)
-	data=$((data-1))
-	echo $data
-	echo "Enter column you want to delete in"
-	read colNumberDelete
+	data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
 
-	while [[ ! $colNumberDelete =~ ^[1-$data]$ ]]; do
-		echo -e "${RED}Enter valid choice${Color_Off}"
-		read colNumberDelete
+	echo "Choose column you want to update in"
+	for column in $data; do
+		((counter++))
+		echo "$counter. To select $column"
 	done
-
+	read colNumberDelete
 	isPrimary=$(awk -F$separator '{if(NR == '$colNumberDelete+1') print $3}' .$tableName)
-
+	echo $colNumberDelete
 	if [[ $isPrimary == "PK" ]]; then
 		echo -e "${RED}Can't delete the Primary key column${Color_Off}"
 		echo -e "${RED}Choose the right table name or column${Color_Off}"
@@ -371,23 +368,27 @@ function deleteColumn {
 		deleteColumn
 	else
 
-		getCol=$colNumberDelete+1
+		# getCol=$colNumberDelete+1
+		#choose empty value or null
+		newValue=""
+		#newValue="null"
+		#awk -v colNumberDelete=$colNumberDelete 'BEGIN {FS = OFS="'$separator'"} {if (NR > 1) {sub($colNumberDelete," ",$colNumberDelete);print $0 >"'$tableName'"}} ' $tableName
+		#awk -F '#' -v colNumberDelete=$colNumberDelete -v nv=$newValue '{if (NR > 1) {sub($colNumberDelete,nv,$colNumberDelete);print $0 >"'$tableName'"}} ' $tableName
+		awk -v colNumberDelete=$colNumberDelete -v newValue=$newValue 'BEGIN {FS = OFS="'$separator'"} {if(NR > 1) {sub($colNumberDelete,newValue,$colNumberDelete)} print $0 >"'$tableName'"}' $tableName
+		# if [[ $? == 0 ]]; then
+		# 	sed $getCol'd' .$tableName > .$tableName
+		# 	if [[ $? == 0 ]]; then
+		# 		echo -e "${GREEN}Updated Successfully${Color_Off}"
+		# 	else
+		# 		echo -e "${RED}Error while Updating Table $tableName${Color_Off}"
+		# 	fi
+		# else
+		# 	echo -e "${RED}Error while Updating Table $tableName${Color_Off}"
+		# fi
 
-		awk -v C0=$Color_Off -v C3=$Cyan  -v colNumberUpdate=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"} {sub($colNumberUpdate,"",$colNumberUpdate);print $0 >"'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
-
-		if [[ $? == 0 ]]; then
-			sed $getCol'd' .$tableName > .$tableName
-			if [[ $? == 0 ]]; then
-				echo -e "${GREEN}Updated Successfully${Color_Off}"
-			else
-				echo -e "${RED}Error while Updating Table $tableName${Color_Off}"
-			fi
-		else
-			echo -e "${RED}Error while Updating Table $tableName${Color_Off}"
-		fi
-
-		tableMenu
 	fi
+	tableMenu
+
 }
 
 function deleteFromTable {
