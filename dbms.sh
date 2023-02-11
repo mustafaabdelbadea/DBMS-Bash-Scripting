@@ -559,7 +559,6 @@ function updateRows {
 		#-z check if value is empty
 		if [[ -z $newValue ]]; then
 			echo -e "${RED}Primary key can not be empty!${Color_Off}"
-			continue
 		fi
 
 		primaryKey=$(cut -d$separator -f$(($colNumberUpdate)) $tableName | grep "^$newValue")
@@ -569,7 +568,7 @@ function updateRows {
 			echo -e "${RED}Primary key found!${Color_Off}"	
 			echo -e "${RED}Primary key cant't be duplicated!${Color_Off}"		
 		else
-		awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
+		awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
 		fi
 	else
 		#echo "awk in primary"
@@ -577,7 +576,7 @@ function updateRows {
 		then
 			echo "Updated"
 		fi
-		awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
+		awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
 	fi
 	#if [[ $isPrimary == "PK"]]
 	
