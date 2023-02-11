@@ -526,27 +526,63 @@ function updateRows {
 		((counter++))
 		echo "$counter $column"
 	done
-	echo "equals ?"
+	
 	read updateBy
 
 	while [[ ! $updateBy =~ ^[1-$counter]$ ]]; do
 		echo -e "${RED}Enter valid choice${Color_Off}"
 		read updateBy
 	done
-
+	echo "equals ?"
 	echo "enter the condition value "
 	read oldValue
 	echo "enter the new value of the field"
 	read newValue
-
-	#if [[ $isPrimary == "PK"]]
-	echo start awk
-	#awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
-	#awk -v ov=$oldValue -v nv=$newValue -v conditionField=$updateBy -v updateField=$colNumberUpdate 'BEGIN{FS = OFS="'$separator'"}{if($conditionField==ov){$updateField=nv; print $updateField}}' $tableName
-	if [[ $? == 0 ]]
-	then
-		echo "Updated"
+	currentType=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $2}' .$tableName)
+	echo $currentType
+	isPrimary=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $3}' .$tableName)
+	if [[ $currentType == "str" ]]; then
+				while [[ ! $newValue =~ ^[a-zA-Z]*$ ]]; do
+					echo -e "${RED}"Invalid data type"${Color_Off}"
+					echo -e "${RED}"enter a string value for the field"${Color_Off}"
+					read newValue
+				done
+			elif [[ $currentType == "int" ]]; then
+				while [[ ! $newValue =~ ^[0-9]*$ ]]; do
+					echo -e "${RED}"enter an integer value for the field"${Color_Off}"
+					read newValue
+				done
 	fi
+
+	if [[ $isPrimary == "PK" ]]
+	then
+		#-z check if value is empty
+		if [[ -z $newValue ]]; then
+			echo -e "${RED}Primary key can not be empty!${Color_Off}"
+			continue
+		fi
+
+		primaryKey=$(cut -d$separator -f$(($colNumberUpdate)) $tableName | grep "^$newValue")
+
+		if [[ $primaryKey == $newValue ]]
+		then
+			echo -e "${RED}Primary key found!${Color_Off}"	
+			echo -e "${RED}Primary key cant't be duplicated!${Color_Off}"		
+		else
+		awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
+		fi
+	else
+		#echo "awk in primary"
+		if [[ $? == 0 ]]
+		then
+			echo "Updated"
+		fi
+		awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
+	fi
+	#if [[ $isPrimary == "PK"]]
+	
+	#awk -v ov=$oldValue -v nv=$newValue -v conditionField=$updateBy -v updateField=$colNumberUpdate 'BEGIN{FS = OFS="'$separator'"}{if($conditionField==ov){$updateField=nv; print $updateField}}' $tableName
+	
 	tableMenu
 }
 
