@@ -376,7 +376,6 @@ function deleteColumn {
 		#awk -F '#' -v colNumberDelete=$colNumberDelete -v nv=$newValue '{if (NR > 1) {sub($colNumberDelete,nv,$colNumberDelete);print $0 >"'$tableName'"}} ' $tableName
 		awk -v colNumberDelete=$colNumberDelete -v newValue=$newValue 'BEGIN {FS = OFS="'$separator'"} {if(NR > 1) {sub($colNumberDelete,newValue,$colNumberDelete)} print $0 >"'$tableName'"}' $tableName
 		# if [[ $? == 0 ]]; then
-		# 	sed $getCol'd' .$tableName > .$tableName
 		# 	if [[ $? == 0 ]]; then
 		# 		echo -e "${GREEN}Updated Successfully${Color_Off}"
 		# 	else
