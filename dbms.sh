@@ -498,7 +498,56 @@ function updateColumns {
 }
 
 function updateRows {
-	echo hello
+	colNumberUpdate=0
+	counter=0
+	updateBy=0
+	oldValue=""
+	newValue=""
+
+	#To retrive columns names
+	data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+
+	echo "Update which column "
+	for column in $data; do
+		((counter++))
+		echo "$counter $column"
+	done
+	read colNumberUpdate
+
+	while [[ ! $colNumberUpdate =~ ^[1-$counter]$ ]]; do
+		echo -e "${RED}Enter valid choice${Color_Off}"
+		read colNumberUpdate
+	done
+
+	isPrimary=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $3}' .$tableName)
+	counter=0
+	echo "Update row where "
+	for column in $data; do
+		((counter++))
+		echo "$counter $column"
+	done
+	echo "equals ?"
+	read updateBy
+
+	while [[ ! $updateBy =~ ^[1-$counter]$ ]]; do
+		echo -e "${RED}Enter valid choice${Color_Off}"
+		read updateBy
+	done
+
+	echo "enter the condition value "
+	read oldValue
+	echo "enter the new value of the field"
+	read newValue
+
+	#if [[ $isPrimary == "PK"]]
+	echo start awk
+	#awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
+	#awk -v ov=$oldValue -v nv=$newValue -v conditionField=$updateBy -v updateField=$colNumberUpdate 'BEGIN{FS = OFS="'$separator'"}{if($conditionField==ov){$updateField=nv; print $updateField}}' $tableName
+	if [[ $? == 0 ]]
+	then
+		echo "Updated"
+	fi
+	tableMenu
 }
 
 function updateTable {
