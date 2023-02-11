@@ -353,10 +353,10 @@ function deleteColumn {
 	#To retrive columns names
 	data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
 
-	echo "Choose column you want to update in"
+	echo "Choose column you want to delete"
 	for column in $data; do
 		((counter++))
-		echo "$counter. To select $column"
+		echo "$counter. To delete $column"
 	done
 	read colNumberDelete
 	isPrimary=$(awk -F$separator '{if(NR == '$colNumberDelete+1') print $3}' .$tableName)
@@ -430,10 +430,10 @@ function updateColumns {
 	#To retrive columns names
 	data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
 
-	echo "Choose column you want to update in"
+	echo "Choose column you want to update"
 	for column in $data; do
 		((counter++))
-		echo "$counter. To select $column"
+		echo "$counter. To update $column"
 	done
 
 	read colNumberUpdate
