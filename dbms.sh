@@ -342,6 +342,10 @@ function selectTable {
 
 }
 
+function deleteRow {
+	echo "Delete a row"
+}
+
 function deleteFromRow {
 	colNumberDelete=0
 	counter=0
@@ -457,13 +461,16 @@ function deleteFromTable {
 
 	echo "Enter your delete choice"
 
-	select choice in "Delete a column" "Delete from Row" "Exit"; do
+	select choice in "Delete a column" "Delete from Row" "Delete a row" "Exit"; do
 		case $choice in
 		"Delete a column")
 			deleteColumn
 			;;
 		"Delete from Row")
 			deleteFromRow
+			;;
+		"Delete a row")
+			deleteRow
 			;;
 		"Exit")
 			exitFromSubTable
