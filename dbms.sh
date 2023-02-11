@@ -342,8 +342,66 @@ function selectTable {
 
 }
 
-function deleteRows {
-	echo "Hello"
+function deleteFromRow {
+	colNumberDelete=0
+	counter=0
+	deleteBy=0
+	oldValue=""
+	newValue=""
+
+	#To retrive columns names
+	data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+
+	echo "Delete which column "
+
+	for column in $data; do
+		((counter++))
+		echo "$counter $column"
+	done
+
+	read colNumberDelete
+
+	while [[ ! $colNumberDelete =~ ^[1-$counter]$ ]]; do
+		echo -e "${RED}Enter valid choice${Color_Off}"
+		read colNumberDelete
+	done
+
+	isPrimary=$(awk -F$separator '{if(NR == '$colNumberDelete+1') print $3}' .$tableName)
+	counter=0
+	echo "Delete row where "
+	for column in $data; do
+		((counter++))
+		echo "$counter $column"
+	done
+	
+	read deleteBy
+
+	while [[ ! $deleteBy =~ ^[1-$counter]$ ]]; do
+		echo -e "${RED}Enter valid choice${Color_Off}"
+		read deleteBy
+	done
+
+	echo "equals ?"
+
+	echo "enter the condition value "
+	read oldValue
+	
+	newValue=""
+
+	isPrimary=$(awk -F$separator '{if(NR == '$colNumberDelete+1') print $3}' .$tableName)
+
+	if [[ $isPrimary == "PK" ]]
+	then
+				echo -e "${RED}Can not delete primary key!${Color_Off}"
+	else
+		awk -v ov=$oldValue -v nv=$newValue -v field=$deleteBy -v update=$colNumberDelete 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
+		if [[ $? == 0 ]]
+		then
+			echo -e "${GREEN}Deleted Successfully${Color_Off}"
+		fi
+	fi
+	
+	tableMenu
 }
 
 function deleteColumn {
@@ -375,16 +433,11 @@ function deleteColumn {
 		#awk -v colNumberDelete=$colNumberDelete 'BEGIN {FS = OFS="'$separator'"} {if (NR > 1) {sub($colNumberDelete," ",$colNumberDelete);print $0 >"'$tableName'"}} ' $tableName
 		#awk -F '#' -v colNumberDelete=$colNumberDelete -v nv=$newValue '{if (NR > 1) {sub($colNumberDelete,nv,$colNumberDelete);print $0 >"'$tableName'"}} ' $tableName
 		awk -v colNumberDelete=$colNumberDelete -v newValue=$newValue 'BEGIN {FS = OFS="'$separator'"} {if(NR > 1) {sub($colNumberDelete,newValue,$colNumberDelete)} print $0 >"'$tableName'"}' $tableName
-		# if [[ $? == 0 ]]; then
-		# 	sed $getCol'd' .$tableName > .$tableName
-		# 	if [[ $? == 0 ]]; then
-		# 		echo -e "${GREEN}Updated Successfully${Color_Off}"
-		# 	else
-		# 		echo -e "${RED}Error while Updating Table $tableName${Color_Off}"
-		# 	fi
-		# else
-		# 	echo -e "${RED}Error while Updating Table $tableName${Color_Off}"
-		# fi
+		if [[ $? == 0 ]]; then
+			echo -e "${GREEN}Updated Successfully${Color_Off}"
+		else
+			echo -e "${RED}Error while Updating Table $tableName${Color_Off}"
+		fi
 
 	fi
 	tableMenu
@@ -404,13 +457,13 @@ function deleteFromTable {
 
 	echo "Enter your delete choice"
 
-	select choice in "Delete a column" "Dalete Rows" "Exit"; do
+	select choice in "Delete a column" "Delete from Row" "Exit"; do
 		case $choice in
 		"Delete a column")
 			deleteColumn
 			;;
-		"Delete Rows")
-			deleteRows
+		"Delete from Row")
+			deleteFromRow
 			;;
 		"Exit")
 			exitFromSubTable
@@ -471,17 +524,6 @@ function updateColumns {
 				read newValue
 			done
 		fi
-
-		# while [[ $rowCount -le $numOfRows ]]; do
-		# 	#numOfRows=$(awk -F '#' '{if (NR>1) {print NR} }' $tableName)
-		# 	#oldValue=$(awk -F '#' '{if (NR=='$rowCount') {print $'$colNumberUpdate'} }' $tableName)
-		# 	#oldValue=$(awk -F '#' '{ if (NR>1) {print $'$colNumberUpdate'} }' $tableName)
-		# 	#echo $oldValue
-		# 	#sed -i ''$rowCount's/'$oldValue'/'$newValue'/g' $tableName #2>> ./.error.log
-		# 	#echo $colNumberUpdate
-		# 	pwd
-		# 	((rowCount++))
-		# done
 
 		echo $newValue
 		echo $colNumberUpdate
@@ -575,7 +617,7 @@ function updateRows {
 		#echo "awk in primary"
 		if [[ $? == 0 ]]
 		then
-			echo "Updated"
+			echo -e "${GREEN}Updated Successfully${Color_Off}"
 		fi
 		awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
 	fi
