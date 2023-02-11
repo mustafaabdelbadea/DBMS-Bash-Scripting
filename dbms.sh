@@ -342,6 +342,36 @@ function selectTable {
 
 }
 
+function deleteAll {
+	echo "Are you sure to delete all data in $tableName"
+
+	select choice in "Yes" "No" "Exit"; do
+		case $choice in
+		"Yes")
+			sed -i '2,$d' $tableName 2>>../../.error.log
+
+			if [[ $? == 0 ]]
+			then
+				echo -e "${GREEN}Data Deleted Successfully${Color_Off}"
+			else 
+				echo -e "${RED}Something went wrong, Try again later${Color_Off}"
+			fi
+			tableMenu
+			;;
+		"No")
+			tableMenu
+			;;
+		"Exit")
+			exitFromSubTable
+			exit
+			;;
+		*)
+			echo -e "${RED}Invalid Choice${Color_Off}"
+			;;
+		esac
+	done
+}
+
 function deleteRow {
 	echo "Delete a row"
 }
@@ -461,8 +491,11 @@ function deleteFromTable {
 
 	echo "Enter your delete choice"
 
-	select choice in "Delete a column" "Delete from Row" "Delete a row" "Exit"; do
+	select choice in "Delete all table" "Delete a column" "Delete from Row" "Delete a row" "Exit"; do
 		case $choice in
+		"Delete all table")
+			deleteAll
+			;;
 		"Delete a column")
 			deleteColumn
 			;;
