@@ -87,6 +87,8 @@ function dropTable {
 function createTable {
 	tableName=""
 	metaData=""
+	temp=""
+	columnName=""
 	echo "Enter table name"
 	read tableName
 
@@ -115,8 +117,15 @@ function createTable {
 
 	metaData="field"$separator"type"$separator"pKey"
 	while [ $counter -le $colNumber ]; do
-		echo "Enter name of column no. $counter"
-		read columnName
+
+			echo "Enter name of column no. $counter"
+			read columnName
+
+		while [[ ! $columnName =~ ^[a-zA-Z]+$ ]]; do
+			echo -e "${RED}Enter valid column name no. $counter ${Color_Off}"
+			read columnName
+		done
+
 		echo "Enter type of column $columnName  (str/int)"
 		select type in "str" "int"; do
 			case $type in
