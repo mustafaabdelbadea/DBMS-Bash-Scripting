@@ -89,6 +89,7 @@ function createTable {
 	metaData=""
 	temp=""
 	columnName=""
+	flag=0
 	echo "Enter table name"
 	read tableName
 
@@ -114,7 +115,7 @@ function createTable {
 
 	counter=1
 	primaryKey=""
-
+	declare -a names
 	metaData="field"$separator"type"$separator"pKey"
 	while [ $counter -le $colNumber ]; do
 
@@ -125,7 +126,21 @@ function createTable {
 			echo -e "${RED}Enter valid column name no. $counter ${Color_Off}"
 			read columnName
 		done
-
+		for val in "${names[@]}"
+		do
+			if	[ $val == $columnName ]
+			then
+				flag=1
+				echo "The column name is duplicated!"
+				echo "Exiting..."
+				break
+			fi
+		done
+		if [ $flag == 1 ]
+		then
+			break
+		fi
+		names+=($columnName)
 		echo "Enter type of column $columnName  (str/int)"
 		select type in "str" "int"; do
 			case $type in
@@ -174,20 +189,25 @@ function createTable {
 		else
 			temp=$temp$columnName$separator
 		fi
-
 		((counter++))
 	done
-	touch .$tableName
-	echo -e $metaData >>.$tableName
-	touch $tableName
-	echo -e $temp >>$tableName
-	if [[ $? == 0 ]]; then
-		echo -e "${GREEN}Table Created${Color_Off}"
-		tableMenu
-	else
-		echo -e "${RED}Error while creating table $tableName${Color_Off}"
-		tableMenu
+	if [ $flag == 0 ]
+	then
+		touch .$tableName
+		echo -e $metaData >>.$tableName
+		touch $tableName
+		echo -e $temp >>$tableName
+		echo "${names[@]}"
+		echo "${names[0]}"
+		if [[ $? == 0 ]]; then
+			echo -e "${GREEN}Table Created${Color_Off}"
+			tableMenu
+		else
+			echo -e "${RED}Error while creating table $tableName${Color_Off}"
+			tableMenu
+		fi
 	fi
+	tableMenu
 }
 
 function insert {
