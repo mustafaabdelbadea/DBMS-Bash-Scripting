@@ -63,19 +63,22 @@ function listTables {
 
 function dropTable {
 	clear
-	echo "Enter name of table or 0 to back to tables menu"
-	read choice
-	if [[ $choice == 0 ]]; then
-		echo "Back"
-		tableMenu
+	if [[ $(ls -1 | wc -l) -eq 0 ]]; then
+		echo -e "${RED}DB is Empty no Tables Found${Color_Off}"
 	else
-		pwd
-		rm .$choice 2>>../../.error.log
-		rm $choice 2>>../../.error.log
-		if [[ $? == 0 ]]; then
-			echo -e "${GREEN}DB $choice Deleted Successfully${Color_Off}"
+		echo "Enter name of table or 0 to back to tables menu"
+		read choice
+		if [[ $choice == 0 ]]; then
+			echo "Back"
+			tableMenu
 		else
-			echo -e "${RED}Error while deleting table, Invalid DB name${Color_Off}"
+			rm .$choice 2>>../../.error.log
+			rm $choice 2>>../../.error.log
+			if [[ $? == 0 ]]; then
+				echo -e "${GREEN}DB $choice Deleted Successfully${Color_Off}"
+			else
+				echo -e "${RED}Error while deleting table, Invalid DB name${Color_Off}"
+			fi
 		fi
 	fi
 	tableMenu
@@ -179,167 +182,175 @@ function createTable {
 }
 
 function insert {
-	echo -e "${Blue}---------------- Insert -------------------${Color_Off}"
-	echo "Enter table name to insert"
-	read tableName
-
-	if [[ ! -f $tableName ]]; then
-		echo -e "${RED}Table doesn't exist${Color_Off}"
+	if [[ $(ls -1 | wc -l) -eq 0 ]]; then
+		echo -e "${RED}DB is Empty no Tables Found${Color_Off}"
 		tableMenu
 	else
-		typeset -i colCount=2
-		typeset -i colsNumber=$(awk 'END{print NR}' .$tableName)
+		echo -e "${Blue}---------------- Insert -------------------${Color_Off}"
+		echo "Enter table name to insert"
+		read tableName
 
-		while [ $colCount -le $colsNumber ]; do
-			currentCol=$(awk -F$separator '{if(NR == '$colCount') print $1}' .$tableName)
-			currentType=$(awk -F$separator '{if(NR == '$colCount') print $2}' .$tableName)
-			isPrimary=$(awk -F$separator '{if(NR == '$colCount') print $3}' .$tableName)
-			echo $isPrimary
-			echo "Enter value of $currentCol column"
-			read currentValue
-
-			if [[ $currentType == "str" ]]; then
-				while [[ ! $currentValue =~ ^[a-zA-Z]*$ ]]; do
-					echo -e "${RED}Enter value of $currentCol column${Color_Off}"
-					read currentValue
-				done
-			elif [[ $currentType == "int" ]]; then
-				while [[ ! $currentValue =~ ^[0-9]*$ ]]; do
-					echo -e "${RED}Enter value of $currentCol column${Color_Off}"
-					read currentValue
-				done
-			fi
-
-			if [[ $isPrimary == "PK" ]]; then
-				#-z check if value is empty
-				if [[ -z $currentValue ]]; then
-					echo -e "${RED}Primary key can not be empty!${Color_Off}"
-					continue
-				fi
-
-				primaryKey=$(cut -d$separator -f$(($colCount - 1)) $tableName | grep "^$currentValue")
-
-				if [[ $primaryKey == $currentValue ]]; then
-					echo -e "${RED}Primary key found!${Color_Off}"
-					continue
-				fi
-			fi
-
-			if [[ $colCount == $colsNumber ]]; then
-				row=$row$currentValue
-			else
-				row=$row$currentValue$separator
-			fi
-			colCount=$colCount+1
-
-		done
-
-		echo $row >>$tableName 2>>../../.error.log
-
-		if [[ $? == 0 ]]; then
-			echo -e "${GREEN}Row has been Inserted Successfully${Color_Off}"
+		if [[ ! -f $tableName ]]; then
+			echo -e "${RED}Table doesn't exist${Color_Off}"
+			tableMenu
 		else
-			echo -e "${RED}Error while Inserting Data into Table $tableName${Color_Off}"
+			typeset -i colCount=2
+			typeset -i colsNumber=$(awk 'END{print NR}' .$tableName)
+
+			while [ $colCount -le $colsNumber ]; do
+				currentCol=$(awk -F$separator '{if(NR == '$colCount') print $1}' .$tableName)
+				currentType=$(awk -F$separator '{if(NR == '$colCount') print $2}' .$tableName)
+				isPrimary=$(awk -F$separator '{if(NR == '$colCount') print $3}' .$tableName)
+				echo $isPrimary
+				echo "Enter value of $currentCol column"
+				read currentValue
+
+				if [[ $currentType == "str" ]]; then
+					while [[ ! $currentValue =~ ^[a-zA-Z]*$ ]]; do
+						echo -e "${RED}Enter value of $currentCol column${Color_Off}"
+						read currentValue
+					done
+				elif [[ $currentType == "int" ]]; then
+					while [[ ! $currentValue =~ ^[0-9]*$ ]]; do
+						echo -e "${RED}Enter value of $currentCol column${Color_Off}"
+						read currentValue
+					done
+				fi
+
+				if [[ $isPrimary == "PK" ]]; then
+					#-z check if value is empty
+					if [[ -z $currentValue ]]; then
+						echo -e "${RED}Primary key can not be empty!${Color_Off}"
+						continue
+					fi
+
+					primaryKey=$(cut -d$separator -f$(($colCount - 1)) $tableName | grep "^$currentValue")
+
+					if [[ $primaryKey == $currentValue ]]; then
+						echo -e "${RED}Primary key found!${Color_Off}"
+						continue
+					fi
+				fi
+
+				if [[ $colCount == $colsNumber ]]; then
+					row=$row$currentValue
+				else
+					row=$row$currentValue$separator
+				fi
+				colCount=$colCount+1
+
+			done
+
+			echo $row >>$tableName 2>>../../.error.log
+
+			if [[ $? == 0 ]]; then
+				echo -e "${GREEN}Row has been Inserted Successfully${Color_Off}"
+			else
+				echo -e "${RED}Error while Inserting Data into Table $tableName${Color_Off}"
+			fi
+			row=""
+			tableMenu
 		fi
-		row=""
-		tableMenu
 	fi
 
 }
 
 function selectTable {
+	if [[ $(ls -1 | wc -l) -eq 0 ]]; then
+		echo -e "${RED}DB is Empty no Tables Found${Color_Off}"
+		tableMenu
+	else
+		echo -e "${Blue}-------------- Select ------------------${Color_Off}"
+		tableName=""
 
-	echo -e "${Blue}-------------- Select ------------------${Color_Off}"
-	tableName=""
-
-	echo "Enter table name"
-	read tableName
-
-	while [[ ! -f $tableName ]]; do
-		echo -e "${RED}Enter valid table name${Color_Off}"
+		echo "Enter table name"
 		read tableName
-	done
 
-	echo "Enter your selection choice"
-	select choice in "Select All" "Select Column" "Select Row" "Table Menu" "Exit"; do
-		case $choice in
-		"Select All")
-			#column -t --> format table with delimiter whitespace, -s --> to specify delimiter
-			#awk -v define variable
-			column -t -s "$separator" $tableName | awk -v counter=0 -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE -v C3=$Cyan '{ if (NR == 1) print H $0 C0; else if(NR%2 == 0) print C1 $0 C0; else print C2 $0 C0;} END{print C3 "Total number of rows = "((NR-1)) C0}'
-			tableMenu
-			;;
+		while [[ ! -f $tableName ]]; do
+			echo -e "${RED}Enter valid table name${Color_Off}"
+			read tableName
+		done
 
-		"Select Column")
-			colNumber=0
-			counter=0
+		echo "Enter your selection choice"
+		select choice in "Select All" "Select Column" "Select Row" "Table Menu" "Exit"; do
+			case $choice in
+			"Select All")
+				#column -t --> format table with delimiter whitespace, -s --> to specify delimiter
+				#awk -v define variable
+				column -t -s "$separator" $tableName | awk -v counter=0 -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE -v C3=$Cyan '{ if (NR == 1) print H $0 C0; else if(NR%2 == 0) print C1 $0 C0; else print C2 $0 C0;} END{print C3 "Total number of rows = "((NR-1)) C0}'
+				tableMenu
+				;;
 
-			#To retrive columns names
-			data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+			"Select Column")
+				colNumber=0
+				counter=0
 
-			echo "Enter column name"
+				#To retrive columns names
+				data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
 
-			for column in $data; do
-				((counter++))
-				echo "$counter. To select $column"
-			done
+				echo "Enter column name"
 
-			read colNumber
+				for column in $data; do
+					((counter++))
+					echo "$counter. To select $column"
+				done
 
-			while [[ ! $colNumber =~ ^[1-$counter]$ ]]; do
-				echo -e "${RED}Enter valid choice${Color_Off}"
 				read colNumber
-			done
 
-			# while [[ ! $colNumber =~ ^[1-9]+$ ]]; do
-			# 	echo "Enter Column Number"
-			# 	read colNumber
-			# done
+				while [[ ! $colNumber =~ ^[1-$counter]$ ]]; do
+					echo -e "${RED}Enter valid choice${Color_Off}"
+					read colNumber
+				done
 
-			awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE -v C3=$Cyan 'BEGIN{FS="'$separator'"}{if(NR==1) print H $'$colNumber' C0; else if(NR%2 == 0) print C1 $'$colNumber' C0; else print C2 $'$colNumber' C0} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
-			tableMenu
-			;;
+				# while [[ ! $colNumber =~ ^[1-9]+$ ]]; do
+				# 	echo "Enter Column Number"
+				# 	read colNumber
+				# done
 
-		"Select Row")
-			counter=0
-			choice=0
+				awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE -v C3=$Cyan 'BEGIN{FS="'$separator'"}{if(NR==1) print H $'$colNumber' C0; else if(NR%2 == 0) print C1 $'$colNumber' C0; else print C2 $'$colNumber' C0} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
+				tableMenu
+				;;
 
-			#To retrive columns names
-			data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+			"Select Row")
+				counter=0
+				choice=0
 
-			echo "Enter column name"
+				#To retrive columns names
+				data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
 
-			for column in $data; do
-				((counter++))
-				echo "$counter. To select $column"
-			done
+				echo "Enter column name"
 
-			read choice
+				for column in $data; do
+					((counter++))
+					echo "$counter. To select $column"
+				done
 
-			while [[ ! $choice =~ ^[1-$counter]$ ]]; do
-				echo -e "${RED}Enter valid choice${Color_Off}"
 				read choice
-			done
 
-			echo "Enter value to search"
-			read searchVal
-			awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE -v rowsCount=0 -v C3=$Cyan 'BEGIN{FS="'$separator'"}{if ( NR == 1 ) print H $0 C0; if ( $'$choice' == "'$searchVal'" ) {  ((rowsCount++)); if(NR%2 == 0) print C1 $0 C0; else print C2 $0 C0}} END{print C3 "Total number of rows = "rowsCount C0}' $tableName | column -t -s "$separator"
+				while [[ ! $choice =~ ^[1-$counter]$ ]]; do
+					echo -e "${RED}Enter valid choice${Color_Off}"
+					read choice
+				done
 
-			tableMenu
-			;;
+				echo "Enter value to search"
+				read searchVal
+				awk -v C0=$Color_Off -v H=$HEAD_BLUE -v C1=$CELL_GREY -v C2=$CELL_BLUE -v rowsCount=0 -v C3=$Cyan 'BEGIN{FS="'$separator'"}{if ( NR == 1 ) print H $0 C0; if ( $'$choice' == "'$searchVal'" ) {  ((rowsCount++)); if(NR%2 == 0) print C1 $0 C0; else print C2 $0 C0}} END{print C3 "Total number of rows = "rowsCount C0}' $tableName | column -t -s "$separator"
 
-		
-			"Table Menu") tableMenu ;;
-		"Exit")
-			exitFromSubTable
-			exit
-			;;
-		*)
-			echo -e "${RED}Invalid choice${Color_Off}"
-			;;
-		esac
-	done
+				tableMenu
+				;;
 
+			\
+				"Table Menu") tableMenu ;;
+			"Exit")
+				exitFromSubTable
+				exit
+				;;
+			*)
+				echo -e "${RED}Invalid choice${Color_Off}"
+				;;
+			esac
+		done
+	fi
 }
 
 function deleteAll {
@@ -350,10 +361,9 @@ function deleteAll {
 		"Yes")
 			sed -i '2,$d' $tableName 2>>../../.error.log
 
-			if [[ $? == 0 ]]
-			then
+			if [[ $? == 0 ]]; then
 				echo -e "${GREEN}Data Deleted Successfully${Color_Off}"
-			else 
+			else
 				echo -e "${RED}Something went wrong, Try again later${Color_Off}"
 			fi
 			tableMenu
@@ -407,7 +417,7 @@ function deleteFromRow {
 		((counter++))
 		echo "$counter $column"
 	done
-	
+
 	read deleteBy
 
 	while [[ ! $deleteBy =~ ^[1-$counter]$ ]]; do
@@ -419,22 +429,20 @@ function deleteFromRow {
 
 	echo "enter the condition value "
 	read oldValue
-	
+
 	newValue=""
 
 	isPrimary=$(awk -F$separator '{if(NR == '$colNumberDelete+1') print $3}' .$tableName)
 
-	if [[ $isPrimary == "PK" ]]
-	then
-				echo -e "${RED}Can not delete primary key!${Color_Off}"
+	if [[ $isPrimary == "PK" ]]; then
+		echo -e "${RED}Can not delete primary key!${Color_Off}"
 	else
 		awk -v ov=$oldValue -v nv=$newValue -v field=$deleteBy -v update=$colNumberDelete 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
-		if [[ $? == 0 ]]
-		then
+		if [[ $? == 0 ]]; then
 			echo -e "${GREEN}Deleted Successfully${Color_Off}"
 		fi
 	fi
-	
+
 	tableMenu
 }
 
@@ -479,41 +487,46 @@ function deleteColumn {
 }
 
 function deleteFromTable {
-	tableName=""
+	if [[ $(ls -1 | wc -l) -eq 0 ]]; then
+		echo -e "${RED}DB is Empty no Tables Found${Color_Off}"
+		tableMenu
+	else
+		tableName=""
 
-	echo "Enter table name"
-	read tableName
-
-	while [[ ! -f $tableName ]]; do
-		echo -e "${RED}Enter valid table name${Color_Off}"
+		echo "Enter table name"
 		read tableName
-	done
 
-	echo "Enter your delete choice"
+		while [[ ! -f $tableName ]]; do
+			echo -e "${RED}Enter valid table name${Color_Off}"
+			read tableName
+		done
 
-	select choice in "Delete all table" "Delete a column" "Delete from Row" "Delete a row" "Exit"; do
-		case $choice in
-		"Delete all table")
-			deleteAll
-			;;
-		"Delete a column")
-			deleteColumn
-			;;
-		"Delete from Row")
-			deleteFromRow
-			;;
-		"Delete a row")
-			deleteRow
-			;;
-		"Exit")
-			exitFromSubTable
-			exit
-			;;
-		*)
-			echo -e "${RED}Invalid Choice${Color_Off}"
-			;;
-		esac
-	done
+		echo "Enter your delete choice"
+
+		select choice in "Delete all table" "Delete a column" "Delete from Row" "Delete a row" "Exit"; do
+			case $choice in
+			"Delete all table")
+				deleteAll
+				;;
+			"Delete a column")
+				deleteColumn
+				;;
+			"Delete from Row")
+				deleteFromRow
+				;;
+			"Delete a row")
+				deleteRow
+				;;
+			"Exit")
+				exitFromSubTable
+				exit
+				;;
+			*)
+				echo -e "${RED}Invalid Choice${Color_Off}"
+				;;
+			esac
+		done
+	fi
 }
 
 function updateColumns {
@@ -560,7 +573,7 @@ function updateColumns {
 			done
 		elif [[ $currentType == "int" ]]; then
 			while [[ ! $newValue =~ ^[0-9]*$ ]]; do
-				echo -e "${RED}Enter valid value of $currentCol column${Color_Off}" 
+				echo -e "${RED}Enter valid value of $currentCol column${Color_Off}"
 				read newValue
 			done
 		fi
@@ -568,7 +581,7 @@ function updateColumns {
 		echo $newValue
 		echo $colNumberUpdate
 
-		awk -v C0=$Color_Off -v C3=$Cyan  -v colNumberUpdate=$colNumberUpdate -v newValue=$newValue 'BEGIN {FS = OFS="'$separator'"} {if(NR > 1) {sub($colNumberUpdate,newValue,$colNumberUpdate)} print $0 >"'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
+		awk -v C0=$Color_Off -v C3=$Cyan -v colNumberUpdate=$colNumberUpdate -v newValue=$newValue 'BEGIN {FS = OFS="'$separator'"} {if(NR > 1) {sub($colNumberUpdate,newValue,$colNumberUpdate)} print $0 >"'$tableName'"} END{print C3 "Total number of rows = "((NR-1)) C0}' $tableName
 
 		if [[ $? == 0 ]]; then
 			echo -e "${GREEN}Updated Successfully${Color_Off}"
@@ -609,7 +622,7 @@ function updateRows {
 		((counter++))
 		echo "$counter $column"
 	done
-	
+
 	read updateBy
 
 	while [[ ! $updateBy =~ ^[1-$counter]$ ]]; do
@@ -623,40 +636,39 @@ function updateRows {
 	currentType=$(awk -F$separator '{if(NR == '$updateBy+1') print $2}' .$tableName)
 	echo $currentType
 	if [[ $currentType == "str" ]]; then
-				while [[ ! $oldValue =~ ^[a-zA-Z]*$ ]]; do
-					echo -e "${RED}"Invalid data type"${Color_Off}"
-					echo -e "${RED}"enter a string value for the field"${Color_Off}"
-					read oldValue
-				done
-			elif [[ $currentType == "int" ]]; then
-				while [[ ! $oldValue =~ ^[0-9]*$ ]]; do
-					echo -e "${RED}"enter an integer value for the field"${Color_Off}"
-					read oldValue
-				done
+		while [[ ! $oldValue =~ ^[a-zA-Z]*$ ]]; do
+			echo -e "${RED}"Invalid data type"${Color_Off}"
+			echo -e "${RED}"enter a string value for the field"${Color_Off}"
+			read oldValue
+		done
+	elif [[ $currentType == "int" ]]; then
+		while [[ ! $oldValue =~ ^[0-9]*$ ]]; do
+			echo -e "${RED}"enter an integer value for the field"${Color_Off}"
+			read oldValue
+		done
 	fi
 
 	echo "enter the new value of the field"
 	read newValue
 
-	#check that the column that will be updated have the same data type 
+	#check that the column that will be updated have the same data type
 	currentType=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $2}' .$tableName)
 	# check if the column will updated is primary
 	isPrimary=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $3}' .$tableName)
 	if [[ $currentType == "str" ]]; then
-				while [[ ! $newValue =~ ^[a-zA-Z]*$ ]]; do
-					echo -e "${RED}"Invalid data type"${Color_Off}"
-					echo -e "${RED}"enter a string value for the field"${Color_Off}"
-					read newValue
-				done
-			elif [[ $currentType == "int" ]]; then
-				while [[ ! $newValue =~ ^[0-9]*$ ]]; do
-					echo -e "${RED}"enter an integer value for the field"${Color_Off}"
-					read newValue
-				done
+		while [[ ! $newValue =~ ^[a-zA-Z]*$ ]]; do
+			echo -e "${RED}"Invalid data type"${Color_Off}"
+			echo -e "${RED}"enter a string value for the field"${Color_Off}"
+			read newValue
+		done
+	elif [[ $currentType == "int" ]]; then
+		while [[ ! $newValue =~ ^[0-9]*$ ]]; do
+			echo -e "${RED}"enter an integer value for the field"${Color_Off}"
+			read newValue
+		done
 	fi
 
-	if [[ $isPrimary == "PK" ]]
-	then
+	if [[ $isPrimary == "PK" ]]; then
 		#-z check if value is empty
 		if [[ -z $newValue ]]; then
 			echo -e "${RED}Primary key can not be empty!${Color_Off}"
@@ -668,31 +680,27 @@ function updateRows {
 			echo "end of awk"
 			echo $countRowsOfID
 			echo "the PK"
-			
+
 			# if more than one field of the primary key will be updated with the same value
-			if [[ $countRowsOfID -eq 1 ]]
-			then
+			if [[ $countRowsOfID -eq 1 ]]; then
 				primaryKey=$(cut -d$separator -f$(($colNumberUpdate)) $tableName | grep "^$newValue")
-				if [[ $primaryKey == $newValue ]]
-				then
-					echo -e "${RED}Primary key found!${Color_Off}"	
-					echo -e "${RED}Primary key cant't be duplicated!${Color_Off}"		
-				else
-				awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
-				fi
-			elif [[ $countRowsOfID -eq 0 ]]
-			then
-					echo -e "${RED}No fields updated ${Color_Off}"	
-			else
-					echo -e "${RED}More than one row found to be updated${Color_Off}"	
-					echo -e "${RED}Primary key will be duplicated!${Color_Off}"	
+				if [[ $primaryKey == $newValue ]]; then
+					echo -e "${RED}Primary key found!${Color_Off}"
 					echo -e "${RED}Primary key cant't be duplicated!${Color_Off}"
+				else
+					awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
+				fi
+			elif [[ $countRowsOfID -eq 0 ]]; then
+				echo -e "${RED}No fields updated ${Color_Off}"
+			else
+				echo -e "${RED}More than one row found to be updated${Color_Off}"
+				echo -e "${RED}Primary key will be duplicated!${Color_Off}"
+				echo -e "${RED}Primary key cant't be duplicated!${Color_Off}"
 			fi
 		fi
 	else
 		#echo "awk in primary"
-		if [[ $? == 0 ]]
-		then
+		if [[ $? == 0 ]]; then
 			echo -e "${GREEN}Updated Successfully${Color_Off}"
 		fi
 		awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
@@ -701,174 +709,183 @@ function updateRows {
 }
 
 function updateTable {
-	tableName=""
+	if [[ $(ls -1 | wc -l) -eq 0 ]]; then
+		echo -e "${RED}DB is Empty no Tables Found${Color_Off}"
+		tableMenu
+	else
+		tableName=""
 
-	echo "Enter table name"
-	read tableName
-
-	while [[ ! -f $tableName ]]; do
-		echo -e "${RED}Enter valid table name${Color_Off}"
+		echo "Enter table name"
 		read tableName
-	done
 
-	echo "Enter your update choice"
+		while [[ ! -f $tableName ]]; do
+			echo -e "${RED}Enter valid table name${Color_Off}"
+			read tableName
+		done
 
-	select choice in "Update a whole column" "Update Rows" "Exit"; do
-		case $choice in
-		"Update a whole column")
-			updateColumns
-			;;
-		"Update Rows")
-			updateRows
-			;;
-		"Exit")
-			exitFromSubTable
-			exit
-			;;
-		*)
-			echo -e "${RED}Invalid Choice${Color_Off}"
-			;;
-		esac
-	done
+		echo "Enter your update choice"
+
+		select choice in "Update a whole column" "Update Rows" "Exit"; do
+			case $choice in
+			"Update a whole column")
+				updateColumns
+				;;
+			"Update Rows")
+				updateRows
+				;;
+			"Exit")
+				exitFromSubTable
+				exit
+				;;
+			*)
+				echo -e "${RED}Invalid Choice${Color_Off}"
+				;;
+			esac
+		done
+	fi
 }
 
 function exportTable {
+	if [[ $(ls -1 | wc -l) -eq 0 ]]; then
+		echo -e "${RED}DB is Empty no Tables Found${Color_Off}"
+		tableMenu
+	else
+		echo -e "${Blue}-------------- Export ------------------${Color_Off}"
+		tableName=""
 
-	echo -e "${Blue}-------------- Export ------------------${Color_Off}"
-	tableName=""
-
-	echo "Enter table name"
-	read tableName
-
-	while [[ ! -f $tableName ]]; do
-		echo -e "${RED}Enter valid table name${Color_Off}"
+		echo "Enter table name"
 		read tableName
-	done
 
-	timeStamp=$(date +%s)
-	fileName=${tableName}${timeStamp}
+		while [[ ! -f $tableName ]]; do
+			echo -e "${RED}Enter valid table name${Color_Off}"
+			read tableName
+		done
 
-	echo "Enter your export choice"
-	select choice in "Export All" "Export Column" "Export Row" "Table Menu" "Exit"; do
-		case $choice in
-		"Export All")
-			#column -t --> format table with delimiter whitespace, -s --> to specify delimiter
+		timeStamp=$(date +%s)
+		fileName=${tableName}${timeStamp}
 
-			columns=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+		echo "Enter your export choice"
+		select choice in "Export All" "Export Column" "Export Row" "Table Menu" "Exit"; do
+			case $choice in
+			"Export All")
+				#column -t --> format table with delimiter whitespace, -s --> to specify delimiter
 
-			echo $columns
-			totalColumns=""
-			for col in $columns; do
-				totalColumns+=$col","
-			done
+				columns=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
 
-			# -L is used to print null (empty cells)
-			awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $0}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $totalColumns >../../Exported/$fileName.json 2>>../../.error.log
+				echo $columns
+				totalColumns=""
+				for col in $columns; do
+					totalColumns+=$col","
+				done
 
-			if [[ $? == 0 ]]; then
-				echo -e "${GREEN}Table Exported Successfully${Color_Off}"
-			else
-				echo -e "${RED}Something went wrong, Try again later${Color_Off}"
-			fi
-			tableMenu
-			;;
+				# -L is used to print null (empty cells)
+				awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $0}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $totalColumns >../../Exported/$fileName.json 2>>../../.error.log
 
-		"Export Column")
-			colNumber=0
-			counter=0
-			colNameCounter=0
-
-			#To retrive columns names
-			data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
-
-			echo "Enter column name"
-
-			for column in $data; do
-				((counter++))
-				echo "$counter. To select $column"
-			done
-
-			read colNumber
-
-			while [[ ! $colNumber =~ ^[1-$counter]$ ]]; do
-				echo -e "${RED}Enter valid choice${Color_Off}"
-				read colNumber
-			done
-
-			colName=""
-
-			for column in $data; do
-				((colNameCounter++))
-				if [[ $colNameCounter == $colNumber ]]; then
-					colName=$column
+				if [[ $? == 0 ]]; then
+					echo -e "${GREEN}Table Exported Successfully${Color_Off}"
+				else
+					echo -e "${RED}Something went wrong, Try again later${Color_Off}"
 				fi
-			done
+				tableMenu
+				;;
 
-			timeStamp=$(date +%s)
+			"Export Column")
+				colNumber=0
+				counter=0
+				colNameCounter=0
 
-			# -L is used to print null (empty cells)
-			awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $'$colNumber'}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $colName >../../Exported/$fileName.json 2>>../../.error.log
+				#To retrive columns names
+				data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
 
-			if [[ $? == 0 ]]; then
-				echo -e "${GREEN}Table Exported Successfully${Color_Off}"
-			else
-				echo -e "${RED}Something went wrong, Try again later${Color_Off}"
-			fi
+				echo "Enter column name"
 
-			tableMenu
-			;;
+				for column in $data; do
+					((counter++))
+					echo "$counter. To select $column"
+				done
 
-		"Export Row")
-			counter=0
-			choice=0
+				read colNumber
 
-			#To retrive columns names
-			data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+				while [[ ! $colNumber =~ ^[1-$counter]$ ]]; do
+					echo -e "${RED}Enter valid choice${Color_Off}"
+					read colNumber
+				done
 
-			echo "Enter column name"
+				colName=""
 
-			for column in $data; do
-				((counter++))
-				echo "$counter. To select $column"
-			done
+				for column in $data; do
+					((colNameCounter++))
+					if [[ $colNameCounter == $colNumber ]]; then
+						colName=$column
+					fi
+				done
 
-			read choice
+				timeStamp=$(date +%s)
 
-			while [[ ! $choice =~ ^[1-$counter]$ ]]; do
-				echo -e "${RED}Enter valid choice${Color_Off}"
+				# -L is used to print null (empty cells)
+				awk 'BEGIN{FS="'$separator'"}{if (NR==1); else print $'$colNumber'}' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $colName >../../Exported/$fileName.json 2>>../../.error.log
+
+				if [[ $? == 0 ]]; then
+					echo -e "${GREEN}Table Exported Successfully${Color_Off}"
+				else
+					echo -e "${RED}Something went wrong, Try again later${Color_Off}"
+				fi
+
+				tableMenu
+				;;
+
+			"Export Row")
+				counter=0
+				choice=0
+
+				#To retrive columns names
+				data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+
+				echo "Enter column name"
+
+				for column in $data; do
+					((counter++))
+					echo "$counter. To select $column"
+				done
+
 				read choice
-			done
 
-			echo "Enter value to search"
-			read searchVal
+				while [[ ! $choice =~ ^[1-$counter]$ ]]; do
+					echo -e "${RED}Enter valid choice${Color_Off}"
+					read choice
+				done
 
-			totalColumns=""
-			for col in $data; do
-				totalColumns+=$col","
-			done
+				echo "Enter value to search"
+				read searchVal
 
-			# -L is used to print null (empty cells)
-			awk 'BEGIN{FS="'$separator'"}{if ( $'$choice' == "'$searchVal'" ) print $0 }' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $totalColumns >../../Exported/$fileName.json 2>>../../.error.log
+				totalColumns=""
+				for col in $data; do
+					totalColumns+=$col","
+				done
 
-			if [[ $? == 0 ]]; then
-				echo -e "${GREEN}Table Exported Successfully${Color_Off}"
-			else
-				echo -e "${RED}Something went wrong, Try again later${Color_Off}"
-			fi
+				# -L is used to print null (empty cells)
+				awk 'BEGIN{FS="'$separator'"}{if ( $'$choice' == "'$searchVal'" ) print $0 }' $tableName | column -s "$separator" -L -J --table-name $tableName --table-columns $totalColumns >../../Exported/$fileName.json 2>>../../.error.log
 
-			tableMenu
-			;;
+				if [[ $? == 0 ]]; then
+					echo -e "${GREEN}Table Exported Successfully${Color_Off}"
+				else
+					echo -e "${RED}Something went wrong, Try again later${Color_Off}"
+				fi
 
-		"Table Menu") tableMenu ;;
-		"Exit")
-			exitFromSubTable
-			exit
-			;;
-		*)
-			echo -e "${RED}Invalid choice${Color_Off}"
-			;;
-		esac
-	done
+				tableMenu
+				;;
+
+			"Table Menu") tableMenu ;;
+			"Exit")
+				exitFromSubTable
+				exit
+				;;
+			*)
+				echo -e "${RED}Invalid choice${Color_Off}"
+				;;
+			esac
+		done
+	fi
 }
 
 function tableMenu {
