@@ -342,36 +342,6 @@ function selectTable {
 
 }
 
-function deleteAll {
-	echo "Are you sure to delete all data in $tableName"
-
-	select choice in "Yes" "No" "Exit"; do
-		case $choice in
-		"Yes")
-			sed -i '2,$d' $tableName 2>>../../.error.log
-
-			if [[ $? == 0 ]]
-			then
-				echo -e "${GREEN}Data Deleted Successfully${Color_Off}"
-			else 
-				echo -e "${RED}Something went wrong, Try again later${Color_Off}"
-			fi
-			tableMenu
-			;;
-		"No")
-			tableMenu
-			;;
-		"Exit")
-			exitFromSubTable
-			exit
-			;;
-		*)
-			echo -e "${RED}Invalid Choice${Color_Off}"
-			;;
-		esac
-	done
-}
-
 function deleteRow {
 	echo "Delete a row"
 }
@@ -491,11 +461,8 @@ function deleteFromTable {
 
 	echo "Enter your delete choice"
 
-	select choice in "Delete all table" "Delete a column" "Delete from Row" "Delete a row" "Exit"; do
+	select choice in "Delete a column" "Delete from Row" "Delete a row" "Exit"; do
 		case $choice in
-		"Delete all table")
-			deleteAll
-			;;
 		"Delete a column")
 			deleteColumn
 			;;
@@ -586,7 +553,7 @@ function updateRows {
 	updateBy=0
 	oldValue=""
 	newValue=""
-
+	primaryKey=""
 	#To retrive columns names
 	data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
 
@@ -619,10 +586,28 @@ function updateRows {
 	echo "equals ?"
 	echo "enter the condition value "
 	read oldValue
+	#check that the column that will the condition based have the same data type
+	currentType=$(awk -F$separator '{if(NR == '$updateBy+1') print $2}' .$tableName)
+	echo $currentType
+	if [[ $currentType == "str" ]]; then
+				while [[ ! $oldValue =~ ^[a-zA-Z]*$ ]]; do
+					echo -e "${RED}"Invalid data type"${Color_Off}"
+					echo -e "${RED}"enter a string value for the field"${Color_Off}"
+					read oldValue
+				done
+			elif [[ $currentType == "int" ]]; then
+				while [[ ! $oldValue =~ ^[0-9]*$ ]]; do
+					echo -e "${RED}"enter an integer value for the field"${Color_Off}"
+					read oldValue
+				done
+	fi
+
 	echo "enter the new value of the field"
 	read newValue
+
+	#check that the column that will be updated have the same data type 
 	currentType=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $2}' .$tableName)
-	echo $currentType
+	# check if the column will updated is primary
 	isPrimary=$(awk -F$separator '{if(NR == '$colNumberUpdate+1') print $3}' .$tableName)
 	if [[ $currentType == "str" ]]; then
 				while [[ ! $newValue =~ ^[a-zA-Z]*$ ]]; do
@@ -642,16 +627,34 @@ function updateRows {
 		#-z check if value is empty
 		if [[ -z $newValue ]]; then
 			echo -e "${RED}Primary key can not be empty!${Color_Off}"
-		fi
-
-		primaryKey=$(cut -d$separator -f$(($colNumberUpdate)) $tableName | grep "^$newValue")
-
-		if [[ $primaryKey == $newValue ]]
-		then
-			echo -e "${RED}Primary key found!${Color_Off}"	
-			echo -e "${RED}Primary key cant't be duplicated!${Color_Off}"		
 		else
-		awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
+			countRowsOfID=0
+			echo "begin of awk"
+			echo $updateBy
+			countRowsOfID=$(awk -v num=$countRowsOfID 'BEGIN{FS="#"}{if ($'$updateBy' == "'$oldValue'") num++;} END{ print num}' $tableName)
+			echo "end of awk"
+			echo $countRowsOfID
+			echo "the PK"
+			
+			# if more than one field of the primary key will be updated with the same value
+			if [[ $countRowsOfID -eq 1 ]]
+			then
+				primaryKey=$(cut -d$separator -f$(($colNumberUpdate)) $tableName | grep "^$newValue")
+				if [[ $primaryKey == $newValue ]]
+				then
+					echo -e "${RED}Primary key found!${Color_Off}"	
+					echo -e "${RED}Primary key cant't be duplicated!${Color_Off}"		
+				else
+				awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
+				fi
+			elif [[ $countRowsOfID -eq 0 ]]
+			then
+					echo -e "${RED}No fields updated ${Color_Off}"	
+			else
+					echo -e "${RED}More than one row found to be updated${Color_Off}"	
+					echo -e "${RED}Primary key will be duplicated!${Color_Off}"	
+					echo -e "${RED}Primary key cant't be duplicated!${Color_Off}"
+			fi
 		fi
 	else
 		#echo "awk in primary"
@@ -661,10 +664,6 @@ function updateRows {
 		fi
 		awk -v ov=$oldValue -v nv=$newValue -v field=$updateBy -v update=$colNumberUpdate 'BEGIN {FS = OFS="'$separator'"}{if($field==ov){sub($update,nv,$update)}print $0 > "'$tableName'"}' $tableName
 	fi
-	#if [[ $isPrimary == "PK"]]
-	
-	#awk -v ov=$oldValue -v nv=$newValue -v conditionField=$updateBy -v updateField=$colNumberUpdate 'BEGIN{FS = OFS="'$separator'"}{if($conditionField==ov){$updateField=nv; print $updateField}}' $tableName
-	
 	tableMenu
 }
 
