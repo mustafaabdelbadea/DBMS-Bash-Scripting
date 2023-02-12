@@ -119,28 +119,29 @@ function createTable {
 	metaData="field"$separator"type"$separator"pKey"
 	while [ $counter -le $colNumber ]; do
 
-			echo "Enter name of column no. $counter"
-			read columnName
+		echo "Enter name of column no. $counter"
+		read columnName
 
 		while [[ ! $columnName =~ ^[a-zA-Z]+$ ]]; do
 			echo -e "${RED}Enter valid column name no. $counter ${Color_Off}"
 			read columnName
 		done
-		for val in "${names[@]}"
-		do
-			if	[ $val == $columnName ]
-			then
+
+		for val in "${names[@]}"; do
+			if [ $val == $columnName ]; then
 				flag=1
-				echo "The column name is duplicated!"
-				echo "Exiting..."
+				echo -e "${RED}The column name is duplicated!${Color_Off}"
+				echo -e "${RED}Already exists...${Color_Off}"
 				break
 			fi
 		done
-		if [ $flag == 1 ]
-		then
+
+		if [ $flag == 1 ]; then
 			break
 		fi
+
 		names+=($columnName)
+
 		echo "Enter type of column $columnName  (str/int)"
 		select type in "str" "int"; do
 			case $type in
@@ -191,8 +192,7 @@ function createTable {
 		fi
 		((counter++))
 	done
-	if [ $flag == 0 ]
-	then
+	if [ $flag == 0 ]; then
 		touch .$tableName
 		echo -e $metaData >>.$tableName
 		touch $tableName
@@ -420,35 +420,29 @@ function deleteRow {
 	data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
 
 	echo "Delete row  where column "
+
 	for column in $data; do
 		((counter++))
-		echo "$counter $column"
+		echo "$counter. $column"
 	done
+
 	read colNumbertoDeleteBy
 
 	while [[ ! $colNumbertoDeleteBy =~ ^[1-$counter]$ ]]; do
 		echo -e "${RED}Enter valid choice${Color_Off}"
 		read colNumbertoDeleteBy
 	done
-	
+
 	echo "equals ?"
 	echo "enter the condition value "
 	read conditionValue
-	currentType=$(awk -F$separator '{if(NR == '$colNumbertoDeleteBy+1') print $2}' .$tableName)
-	echo $currentType
-	if [[ $currentType == "str" ]]; then
-		while [[ ! $oldValue =~ ^[a-zA-Z]*$ ]]; do
-			echo -e "${RED}"Invalid data type"${Color_Off}"
-			echo -e "${RED}"enter a string value for the field"${Color_Off}"
-			read conditionValue
-		done
-	elif [[ $currentType == "int" ]]; then
-		while [[ ! $oldValue =~ ^[0-9]*$ ]]; do
-			echo -e "${RED}"enter an integer value for the field"${Color_Off}"
-			read conditionValue
-		done
-	fi
+
 	awk 'BEGIN{FS="#"}{if ($'$colNumbertoDeleteBy' == "'$conditionValue'") {next}{print > "'$tableName'" }}' $tableName
+	if [[ $? == 0 ]]; then
+		echo -e "${GREEN}Deleted Successfully${Color_Off}"
+	else
+		echo -e "${RED}Something went wrong, Try again later${Color_Off}"
+	fi
 	tableMenu
 }
 
