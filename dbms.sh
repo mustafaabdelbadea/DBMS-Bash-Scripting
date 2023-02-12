@@ -412,7 +412,44 @@ function deleteAll {
 }
 
 function deleteRow {
-	echo "Delete a row"
+	countRowsOfID=0
+	conditionValue=0
+	counter=0
+	colNumbertoDeleteBy=0
+	#To retrive columns names
+	data=$(awk -F$separator '{ for(i = 1 ; i <= NF; i++) {if (NR==1) { print $i } } }' $tableName)
+
+	echo "Delete row  where column "
+	for column in $data; do
+		((counter++))
+		echo "$counter $column"
+	done
+	read colNumbertoDeleteBy
+
+	while [[ ! $colNumbertoDeleteBy =~ ^[1-$counter]$ ]]; do
+		echo -e "${RED}Enter valid choice${Color_Off}"
+		read colNumbertoDeleteBy
+	done
+	
+	echo "equals ?"
+	echo "enter the condition value "
+	read conditionValue
+	currentType=$(awk -F$separator '{if(NR == '$colNumbertoDeleteBy+1') print $2}' .$tableName)
+	echo $currentType
+	if [[ $currentType == "str" ]]; then
+		while [[ ! $oldValue =~ ^[a-zA-Z]*$ ]]; do
+			echo -e "${RED}"Invalid data type"${Color_Off}"
+			echo -e "${RED}"enter a string value for the field"${Color_Off}"
+			read conditionValue
+		done
+	elif [[ $currentType == "int" ]]; then
+		while [[ ! $oldValue =~ ^[0-9]*$ ]]; do
+			echo -e "${RED}"enter an integer value for the field"${Color_Off}"
+			read conditionValue
+		done
+	fi
+	awk 'BEGIN{FS="#"}{if ($'$colNumbertoDeleteBy' == "'$conditionValue'") {next}{print > "'$tableName'" }}' $tableName
+	tableMenu
 }
 
 function deleteFromRow {
