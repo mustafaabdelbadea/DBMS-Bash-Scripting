@@ -206,7 +206,7 @@ function createTable {
 			tableMenu
 		fi
 	fi
-	
+
 	tableMenu
 }
 
@@ -230,7 +230,8 @@ function insert {
 				currentCol=$(awk -F$separator '{if(NR == '$colCount') print $1}' .$tableName)
 				currentType=$(awk -F$separator '{if(NR == '$colCount') print $2}' .$tableName)
 				isPrimary=$(awk -F$separator '{if(NR == '$colCount') print $3}' .$tableName)
-				echo $isPrimary
+				
+
 				echo "Enter value of $currentCol column"
 				read currentValue
 
@@ -368,7 +369,7 @@ function selectTable {
 				tableMenu
 				;;
 
-			\
+			
 				"Table Menu") tableMenu ;;
 			"Exit")
 				exitFromSubTable
@@ -528,12 +529,11 @@ function deleteColumn {
 		deleteColumn
 	else
 
-		# getCol=$colNumberDelete+1
 		#choose empty value or null
 		newValue=""
+		
 		#newValue="null"
-		#awk -v colNumberDelete=$colNumberDelete 'BEGIN {FS = OFS="'$separator'"} {if (NR > 1) {sub($colNumberDelete," ",$colNumberDelete);print $0 >"'$tableName'"}} ' $tableName
-		#awk -F '#' -v colNumberDelete=$colNumberDelete -v nv=$newValue '{if (NR > 1) {sub($colNumberDelete,nv,$colNumberDelete);print $0 >"'$tableName'"}} ' $tableName
+		
 		awk -v colNumberDelete=$colNumberDelete -v newValue=$newValue 'BEGIN {FS = OFS="'$separator'"} {if(NR > 1) {sub($colNumberDelete,newValue,$colNumberDelete)} print $0 >"'$tableName'"}' $tableName
 		if [[ $? == 0 ]]; then
 			echo -e "${GREEN}Updated Successfully${Color_Off}"
