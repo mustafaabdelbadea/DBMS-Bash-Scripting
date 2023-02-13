@@ -197,8 +197,7 @@ function createTable {
 		echo -e $metaData >>.$tableName
 		touch $tableName
 		echo -e $temp >>$tableName
-		echo "${names[@]}"
-		echo "${names[0]}"
+
 		if [[ $? == 0 ]]; then
 			echo -e "${GREEN}Table Created${Color_Off}"
 			tableMenu
@@ -207,6 +206,7 @@ function createTable {
 			tableMenu
 		fi
 	fi
+	
 	tableMenu
 }
 
