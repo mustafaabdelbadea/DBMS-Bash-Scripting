@@ -77,7 +77,7 @@ function dropTable {
 			if [[ $? == 0 ]]; then
 				echo -e "${GREEN}DB $choice Deleted Successfully${Color_Off}"
 			else
-				echo -e "${RED}Error while deleting table, Invalid DB name${Color_Off}"
+				echo -e "${RED}Error while deleting table, Invalid Table name${Color_Off}"
 			fi
 		fi
 	fi
