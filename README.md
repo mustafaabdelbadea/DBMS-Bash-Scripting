@@ -1,5 +1,27 @@
 # DBMS-ShellScript
 
+<br />
+<div align="center">
+  <a href="https://github.com/github_username/repo_name">
+    <img src="images/dbms.png" alt="Logo" width="250" height="150">
+  </a>
+
+<h3 align="center">DBMS-ShellScript</h3>
+
+  <p align="center">
+    Implementing a databases management system using Bash Shell scripting
+    <br />
+    <a href="https://github.com/mustafaabdelbadea/DBMS-ShellScript"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/mustafaabdelbadea/DBMS-ShellScript">View Demo</a>
+    ·
+    <a href="https://github.com/mustafaabdelbadea/DBMS-ShellScript/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/mustafaabdelbadea/DBMS-ShellScript/issues">Request Feature</a>
+  </p>
+</div>
+
 ## Installation
 
 ### Platform & tools
