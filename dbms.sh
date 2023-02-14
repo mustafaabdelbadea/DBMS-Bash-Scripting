@@ -13,8 +13,6 @@ mkdir -p ./Exported
 echo -e "Made by ${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE} \e]8;;\a ${Color_Off} and ${Blue}\e]8;;${AUTHOR_TWO_LINKEDIN}\a${AUTHOR_TWO}\e]8;;\a${Color_Off}"
 echo -e "* Contact Us${Blue} \e]8;;${AUTHOR_ONE_LINKEDIN}\a${AUTHOR_ONE}\e]8;;\a ${Color_Off}, ${Blue} \e]8;;${AUTHOR_TWO_LINKEDIN}\a${AUTHOR_TWO}\e]8;;\a ${Color_Off}"
 
-# echo -e "Under the supervision of ${SUPERVISOR} ${RED}<3${Color_Off}"
-
 function mainMenu {
 	echo "Enter Your choice"
 	echo "1. Create Database"
