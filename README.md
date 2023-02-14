@@ -11,14 +11,14 @@
   <p align="center">
     Implementing a databases management system using Bash Shell scripting
     <br />
-    <a href="https://github.com/mustafaabdelbadea/DBMS-ShellScript"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/mustafaabdelbadea/DBMS-Bash-Scripting"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/mustafaabdelbadea/DBMS-ShellScript">View Demo</a>
+    <a href="https://github.com/mustafaabdelbadea/DBMS-Bash-Scripting">View Demo</a>
     ·
-    <a href="https://github.com/mustafaabdelbadea/DBMS-ShellScript/issues">Report Bug</a>
+    <a href="https://github.com/mustafaabdelbadea/DBMS-Bash-Scripting/issues">Report Bug</a>
     ·
-    <a href="https://github.com/mustafaabdelbadea/DBMS-ShellScript/issues">Request Feature</a>
+    <a href="https://github.com/mustafaabdelbadea/DBMS-Bash-Scripting/issues">Request Feature</a>
   </p>
 </div>
 
@@ -124,7 +124,7 @@ You should use any linux distribution (redhat, ubuntu,etc..)
 Either clone this repository or fork it on GitHub and clone your fork:
 
 ```
-git clone https://github.com/mustafaabdelbadea/DBMS-ShellScript.git
+git clone https://github.com/mustafaabdelbadea/DBMS-Bash-Scripting.git
 cd DBMS-ShellScript
 ```
 
@@ -143,5 +143,5 @@ Mustafa Abdelbadea - [@mustafaabdelbadea](https://www.linkedin.com/in/mustafa-ab
 </br>
 Adham Gaber - [@AdhamGaber](https://www.linkedin.com/in/adhammgaber)
 
-Project Link: [https://github.com/mustafaabdelbadea/DBMS-ShellScript](https://github.com/mustafaabdelbadea/DBMS-ShellScript)
+Project Link: [https://github.com/mustafaabdelbadea/DBMS-Bash-Scripting](https://github.com/mustafaabdelbadea/DBMS-Bash-Scripting)
   
