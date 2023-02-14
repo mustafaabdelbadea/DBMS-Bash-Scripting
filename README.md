@@ -24,7 +24,7 @@ cd DBMS-ShellScript
     
 ## Contact
 
-Mustafa Abdelbadea - [@linkedin_handle](https://www.linkedin.com/in/mustafa-abdelbadea/) - mustafa.abdelbadea@gamil.com
+Mustafa Abdelbadea - [@mustafaabdelbadea](https://www.linkedin.com/in/mustafa-abdelbadea/) - mustafa.abdelbadea@gamil.com
 
 Project Link: [https://github.com/mustafaabdelbadea/DBMS-ShellScript](https://github.com/mustafaabdelbadea/DBMS-ShellScript)
   
