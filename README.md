@@ -1,4 +1,4 @@
-# DBMS-ShellScript
+# DBMS-Bash Scripting
 
 <br />
 <div align="center">
@@ -6,7 +6,7 @@
     <img src="images/dbms.png" alt="Logo" width="250" height="150">
   </a>
 
-<h3 align="center">DBMS-ShellScript</h3>
+<h3 align="center">DBMS-Bash Scripting</h3>
 
   <p align="center">
     Implementing a databases management system using Bash Shell scripting
