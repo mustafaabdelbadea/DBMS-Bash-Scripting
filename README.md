@@ -3,7 +3,7 @@
 ## Installation
 
 ### Platform & tools
-You should use centos or linux 
+You should use any linux distribution (redhat, ubuntu,etc..) 
 ### Get the Code
 
 Either clone this repository or fork it on GitHub and clone your fork:
@@ -21,3 +21,10 @@ cd DBMS-ShellScript
     chmod u+x ./colors.sh
     ./dbms.sh
     ```
+    
+## Contact
+
+Mustafa Abdelbadea - [@linkedin_handle](https://www.linkedin.com/in/mustafa-abdelbadea/) - mustafa.abdelbadea@gamil.com
+
+Project Link: [https://github.com/mustafaabdelbadea/DBMS-ShellScript](https://github.com/mustafaabdelbadea/DBMS-ShellScript)
+  
